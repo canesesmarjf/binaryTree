@@ -38,11 +38,11 @@ class node
     node * node_right;
         
     // Methods:
-    bool IsPointInsideBoundary(double a);
+    bool IsPointInsideBoundary(double p);
     bool HasNodeReachMaxDepth();
     int WhichSubNodeDoesItBelongTo(double p);
     void CreateSubNodeIfItDoesNotExist(double p);
-    void InsertPointIntoSubNode(double p, uint i, arma::vec * r);
+    void InsertPointIntoSubNode(uint i, arma::vec * r);
 };
 
 #endif

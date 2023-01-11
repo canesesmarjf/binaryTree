@@ -2,7 +2,7 @@
 #include <iostream>
 
 // Improvements:
-// 1 - Remove the else statement in the ::Insert() method
+// [DONE] 1 - Remove the else statement in the ::Insert() method
 // 2 - Use vector<node*> subnodes insteads of node_left and node_right
 // 3 - Pass i and r insteads of sometimes p or i,p and r, otherwise, somehow save the value of the data's pointer &r
 
@@ -79,7 +79,7 @@ void node::Insert(uint i, arma::vec * r)
 
     // Insert point into subnode:
     // ==========================
-    InsertPointIntoSubNode(p,i,r);
+    InsertPointIntoSubNode(i,r);
     
 } // node::Insert
 
@@ -176,8 +176,11 @@ void node::CreateSubNodeIfItDoesNotExist(double p)
     }
 }
 
-void node::InsertPointIntoSubNode(double p, uint i, arma::vec * r)
+void node::InsertPointIntoSubNode(uint i, arma::vec * r)
 {
+    // Current data point:
+    double p = arma::as_scalar(r->at(i));
+    
     // Find which subnode does point p belong to:
     int newSubNode = WhichSubNodeDoesItBelongTo(p);
     
