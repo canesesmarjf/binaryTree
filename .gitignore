@@ -1,0 +1,6 @@
+.DS_Store
+bin/
+obj/
+*.txt
+output_files/
+arma_libs/
