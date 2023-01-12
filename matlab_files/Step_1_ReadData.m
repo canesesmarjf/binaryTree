@@ -29,19 +29,21 @@ x = linspace(-4,4,1e3);
 y = normalDistPDF(x,0,8/10);
 
 % Create histogram:
-figure('color','w')
-hold on
-box on
-h(1) = histogram(set,100,'Normalization','pdf');
-h(2) = plot(x,y,'r','LineWidth',2);
-
-legendText{1} = ['C++ armadillo data'];
-legendText{2} = ['Theoretical PDF'];
-
-title('Normally distributed data produced from C++ code')
-hL = legend(h,legendText);
-hL.Interpreter = 'Latex';
-hL.FontSize = 13;
+if 0
+    figure('color','w')
+    hold on
+    box on
+    h(1) = histogram(set,100,'Normalization','pdf');
+    h(2) = plot(x,y,'r','LineWidth',2);
+    
+    legendText{1} = ['C++ armadillo data'];
+    legendText{2} = ['Theoretical PDF'];
+    
+    title('Normally distributed data produced from C++ code')
+    hL = legend(h,legendText);
+    hL.Interpreter = 'Latex';
+    hL.FontSize = 13;
+end
 
 % Plot raw data with queries from C++ binary search tree:
 figure('color','w')

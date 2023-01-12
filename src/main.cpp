@@ -37,9 +37,7 @@ int main()
 
     // Create instance of binary tree:
     node BinaryTree(x_left,x_right,depth_root,depth_max);
-        
-    cout << "status of subnode[0] : " << BinaryTree.GetSubNode(0) << endl;
-    
+            
     //Build binary tree:
     auto start = high_resolution_clock::now();
     for (int i = 0; i < r.size(); i++)

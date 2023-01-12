@@ -38,33 +38,6 @@ cleanBin:
 cleanObj:
 	-rm -r obj/*
 
-# List of exectable files:
-# =====================================================================================================================
-#EXE = BinaryTree.exe
-
-# Associated object and source files:
-# =====================================================================================================================
-#OBJ = $(EXE:.exe=.o)
-#SRC = $(EXE:.exe=.cpp)
-
-# Targets:
-# =====================================================================================================================
-#all: $(EXE)
-#
-## The following target uses the material presented in 4.12.1 Syntax of Static Pattern Rules
-## https://www.gnu.org/software/make/manual/make.html#Multiple-Targets
-#$(EXE): %.exe : %.o
-#	$(COMPILER) obj/$< -o bin/$@ $(LIBS) -std=c++11
-#
-#	if [ $(SYS) = "Darwin" ]; then \
-#		echo "Additional steps for compilation on OS... DONE!"; \
-#		install_name_tool -change @rpath/libarmadillo.9.dylib $(ARMA_LIBS)libarmadillo.9.dylib bin/$@; \
-#	fi
-#
-#$(OBJ): %.o : %.cpp
-#	$(COMPILER) -c src/$< -o obj/$@ $(INCL) -std=c++11
-#
-#$(SRC):
 
 
 

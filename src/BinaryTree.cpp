@@ -4,8 +4,9 @@
 // Improvements:
 // [DONE] 1 - Remove the else statement in the ::Insert() method
 // [DONE] 2 - Use vector<node*> subnodes insteads of node_left and node_right
-// 3 - Pass i and r insteads of sometimes p or i,p and r, otherwise, somehow save the value of the data's pointer &r
+// [DONE] 3 - Pass i and r insteads of sometimes p or i,p and r, otherwise, somehow save the value of the data's pointer &r
 // 4 - Make getter and setter functions to hide all variables as private
+// 5- Improve code execution by optimizing dynamic memory allocation via (a) insert for counting and then (b) insert for allocating + appending
 
 
 using namespace std;
@@ -97,8 +98,8 @@ void node::Insert(uint i, arma::vec * r)
     
     // Insert point into subnode:
     // ==========================
-    InsertPointIntoSubNode(i,r);
-    
+    this->subnode[node_index]->Insert(i,r);
+        
 } // node::Insert
 
 
@@ -158,22 +159,6 @@ int node::WhichSubNodeDoesItBelongTo(double p)
     }
         
     return node_index;
-}
-
-// ==================================================================================================================
-void node::InsertPointIntoSubNode(uint i, arma::vec * r)
-{
-    // Consider passing in int node_index so that we do not have to call again WhichSubNodeDoesItBelongTo(p)
-    
-    // Current data point:
-    double p = arma::as_scalar(r->at(i));
-    
-    // Find which subnode does point p belong to:
-    int node_index = WhichSubNodeDoesItBelongTo(p);
-    
-    // Insert point into subnode and drill down deeper:
-    this->subnode[node_index]->Insert(i,r);
-    
 }
 
 // Find method:

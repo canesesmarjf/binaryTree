@@ -40,14 +40,12 @@ class node
     //   +------------------+------------------+
     //   |  left_node = 1   |  right_node = 0  |
     std::vector<node *> subnode;
-    //node * node_left;
-    //node * node_right;
+
         
     // Methods:
     bool IsPointInsideBoundary(double p);
     bool HasNodeReachMaxDepth();
     int WhichSubNodeDoesItBelongTo(double p);
-    void InsertPointIntoSubNode(uint i, arma::vec * r);
     bool DoesSubNodeExist(int subNode);
     void CreateSubNode(int subNode);
 };
