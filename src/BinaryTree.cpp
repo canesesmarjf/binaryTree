@@ -5,10 +5,13 @@
 // [DONE] 1 - Remove the else statement in the ::Insert() method
 // 2 - Use vector<node*> subnodes insteads of node_left and node_right
 // 3 - Pass i and r insteads of sometimes p or i,p and r, otherwise, somehow save the value of the data's pointer &r
+// 4 - Make getter and setter functions to hide all variables as private
 
 
 using namespace std;
 
+// Constructors:
+// ==================================================================================================================
 node::node()
 {
     cout << "default constructor" << endl;
@@ -29,6 +32,8 @@ node::node(double x_left, double x_right, int depth, int depth_max)
 
 }
 
+// Insert method:
+// ==================================================================================================================
 void node::Insert(uint i, arma::vec * r)
 {
     // Objective:
@@ -73,9 +78,20 @@ void node::Insert(uint i, arma::vec * r)
         return;
     }
     
+    // Determine which subnode to insert point:
+    // ========================================
+    int subNode = WhichSubNodeDoesItBelongTo(p);
+    
+    // Check if subnode needs to be created:
+    // ====================================
+    if ( !DoesSubNodeExist(subNode) )
+    {
+        CreateSubNode(subNode);
+    }
+    
     // Create subnode if it does not exist:
     // ====================================
-    CreateSubNodeIfItDoesNotExist(p);
+    //CreateSubNodeIfItDoesNotExist(p);
 
     // Insert point into subnode:
     // ==========================
@@ -83,6 +99,8 @@ void node::Insert(uint i, arma::vec * r)
     
 } // node::Insert
 
+
+// ==================================================================================================================
 bool node::IsPointInsideBoundary(double p)
 {
     // Objective:
@@ -99,6 +117,7 @@ bool node::IsPointInsideBoundary(double p)
     return flag;
 }
 
+// ==================================================================================================================
 bool node::HasNodeReachMaxDepth()
 {
     int depth     = this->depth;
@@ -106,7 +125,6 @@ bool node::HasNodeReachMaxDepth()
         
     if (depth >= depth_max)
     {
-//        cout << "maximum depth reached" << endl;
         return 1;
     }
     else
@@ -115,6 +133,7 @@ bool node::HasNodeReachMaxDepth()
     }
 }
 
+// ==================================================================================================================
 int node::WhichSubNodeDoesItBelongTo(double p)
 {
     //   +------------------+------------------+
@@ -139,43 +158,7 @@ int node::WhichSubNodeDoesItBelongTo(double p)
     return node_number;
 }
 
-void node::CreateSubNodeIfItDoesNotExist(double p)
-{
-    // Find which subnode does point p belong to:
-    int newSubNode = WhichSubNodeDoesItBelongTo(p);
-            
-    // Create new subnode if it does not exists:
-    switch (newSubNode)
-    {
-    case 1: // Right subnode:
-        if (NULL == node_right)
-        {
-            // Attributes for new subnode:
-            double x_left  = this->x_center;
-            double x_right = this->x_right;
-            int depth = this->depth + 1;
-            int depth_max = this->depth_max;
-            
-            // Create new subnode:
-            this->node_right = new node(x_left, x_right, depth, depth_max);
-        }
-        break;
-    case 2: // Left subnode:
-        if (NULL == node_left)
-        {
-            // Attributes for new subnode:
-            double x_left  = this->x_left;
-            double x_right = this->x_center;
-            int depth = this->depth + 1;
-            int depth_max = this->depth_max;
-            
-            // Create new subnode:
-            this->node_left = new node(x_left, x_right, depth, depth_max);
-        }
-        break;
-    }
-}
-
+// ==================================================================================================================
 void node::InsertPointIntoSubNode(uint i, arma::vec * r)
 {
     // Current data point:
@@ -200,6 +183,8 @@ void node::InsertPointIntoSubNode(uint i, arma::vec * r)
     } // switch
 }
 
+// Find method:
+// ==================================================================================================================
 node * node::Find(double xq)
 {
     
@@ -221,22 +206,27 @@ node * node::Find(double xq)
     // Determine which subnode to move into:
     int subNode = WhichSubNodeDoesItBelongTo(xq);
         
-    // Check if node exists:
-    switch (subNode)
+    // Check if subnode exists:
+    if (!DoesSubNodeExist(subNode))
     {
-    case 1: // Right subnode:
-        if (NULL == node_right)
-        {
-            return NULL;
-        }
-        break;
-    case 2: // Left subnode:
-        if (NULL == node_left)
-        {
-            return NULL;
-        }
-        break;
+        return NULL;
     }
+    
+//    switch (subNode)
+//    {
+//    case 1: // Right subnode:
+//        if (NULL == node_right)
+//        {
+//            return NULL;
+//        }
+//        break;
+//    case 2: // Left subnode:
+//        if (NULL == node_left)
+//        {
+//            return NULL;
+//        }
+//        break;
+//    }
     
     // Drill further into subnode:
     switch (subNode)
@@ -255,8 +245,111 @@ node * node::Find(double xq)
     
 }
 
+// ==================================================================================================================
+bool node::DoesSubNodeExist(int subNode)
+{
+    // Create new subnode if it does not exists:
+    switch (subNode)
+    {
+    case 1: // Right subnode:
+        if (NULL == node_right)
+        {
+            // Does not exist:
+            return 0;
+        }
+        else
+        {
+            // It already exists:
+            return 1;
+        }
+        break;
+    case 2: // Left subnode:
+        if (NULL == node_left)
+        {
+            // Does not exist:
+            return 0;
+        }
+        else
+        {
+            // It already exists:
+            return 1;
+        }
+        break;
+    }
+}
+
+// ==================================================================================================================
+void node::CreateSubNode(int subNode)
+{
+    // Create new subnode if it does not exists:
+    switch (subNode)
+    {
+    case 1: // Right subnode:
+        {
+            // Attributes for new subnode:
+            double x_left  = this->x_center;
+            double x_right = this->x_right;
+            int depth = this->depth + 1;
+            int depth_max = this->depth_max;
+            
+            // Create new subnode:
+            this->node_right = new node(x_left, x_right, depth, depth_max);
+                
+            // Exit:
+            break;
+        }
+    case 2: // Left subnode:
+        {
+            // Attributes for new subnode:
+            double x_left  = this->x_left;
+            double x_right = this->x_center;
+            int depth = this->depth + 1;
+            int depth_max = this->depth_max;
+            
+            // Create new subnode:
+            this->node_left = new node(x_left, x_right, depth, depth_max);
+                
+            // Exit:
+            break;
+        }
+    }
+}
 
 
-
-
+//void node::CreateSubNodeIfItDoesNotExist(double p)
+//{
+//    // Find which subnode does point p belong to:
+//    int newSubNode = WhichSubNodeDoesItBelongTo(p);
+//
+//    // Create new subnode if it does not exists:
+//    switch (newSubNode)
+//    {
+//    case 1: // Right subnode:
+//        if (NULL == node_right)
+//        {
+//            // Attributes for new subnode:
+//            double x_left  = this->x_center;
+//            double x_right = this->x_right;
+//            int depth = this->depth + 1;
+//            int depth_max = this->depth_max;
+//
+//            // Create new subnode:
+//            this->node_right = new node(x_left, x_right, depth, depth_max);
+//        }
+//        break;
+//    case 2: // Left subnode:
+//        if (NULL == node_left)
+//        {
+//            // Attributes for new subnode:
+//            double x_left  = this->x_left;
+//            double x_right = this->x_center;
+//            int depth = this->depth + 1;
+//            int depth_max = this->depth_max;
+//
+//            // Create new subnode:
+//            this->node_left = new node(x_left, x_right, depth, depth_max);
+//        }
+//        break;
+//    }
+//}
 

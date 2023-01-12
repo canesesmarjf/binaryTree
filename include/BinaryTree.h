@@ -41,8 +41,10 @@ class node
     bool IsPointInsideBoundary(double p);
     bool HasNodeReachMaxDepth();
     int WhichSubNodeDoesItBelongTo(double p);
-    void CreateSubNodeIfItDoesNotExist(double p);
     void InsertPointIntoSubNode(uint i, arma::vec * r);
+    bool DoesSubNodeExist(int subNode);
+    void CreateSubNode(int subNode);
+
 };
 
 #endif

@@ -4,3 +4,4 @@ obj/
 *.txt
 output_files/
 arma_libs/
+*.asv
