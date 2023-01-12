@@ -48,6 +48,7 @@ figure('color','w')
 hold on
 box on
 hq(1) = plot(set,'k.');
+grid on;
 
 for qq = 1:3
     try

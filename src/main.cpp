@@ -30,7 +30,7 @@ int main()
     r.save("output_files/data.txt",raw_ascii);
     
     // Define maximum depth of tree:
-    int depth_max = 6;
+    int depth_max = 7;
     
     // Root node depth:
     int depth_root = 0;
