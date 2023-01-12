@@ -211,23 +211,7 @@ node * node::Find(double xq)
     {
         return NULL;
     }
-    
-//    switch (subNode)
-//    {
-//    case 1: // Right subnode:
-//        if (NULL == node_right)
-//        {
-//            return NULL;
-//        }
-//        break;
-//    case 2: // Left subnode:
-//        if (NULL == node_left)
-//        {
-//            return NULL;
-//        }
-//        break;
-//    }
-    
+       
     // Drill further into subnode:
     switch (subNode)
     {
