@@ -26,16 +26,22 @@ class node
     // Methods:
     void Insert(uint i, arma::vec * r);
     node * Find(double xq);
-    
+    node * GetSubNode(int index);
+
     private:
         
     // Tree depth level attributes:
     int depth;
     int depth_max;
     
-    // Subnodes:
-    node * node_left;
-    node * node_right;
+    // Subnodes within this node:
+    // subnode[0] : right_node
+    // subnode[1] : left_node
+    //   +------------------+------------------+
+    //   |  left_node = 1   |  right_node = 0  |
+    std::vector<node *> subnode;
+    //node * node_left;
+    //node * node_right;
         
     // Methods:
     bool IsPointInsideBoundary(double p);
@@ -44,7 +50,6 @@ class node
     void InsertPointIntoSubNode(uint i, arma::vec * r);
     bool DoesSubNodeExist(int subNode);
     void CreateSubNode(int subNode);
-
 };
 
 #endif

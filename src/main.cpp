@@ -38,7 +38,9 @@ int main()
     // Create instance of binary tree:
     node BinaryTree(x_left,x_right,depth_root,depth_max);
         
-    // Build binary tree:
+    cout << "status of subnode[0] : " << BinaryTree.GetSubNode(0) << endl;
+    
+    //Build binary tree:
     auto start = high_resolution_clock::now();
     for (int i = 0; i < r.size(); i++)
     {
@@ -47,24 +49,24 @@ int main()
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>(stop - start);
     cout << duration.count() << endl;
-    
+
     // Find data in tree:
     int queries = 3;
     node * result = NULL;
-    
+
     // Create string stream object:
     stringstream sso;
-        
+
     for (int i = 0; i < queries; i++)
     {
         // Prompt and gather data from user:
         cout << "Enter a number: " << endl;
         double xq;
         cin >> xq;
-        
+
         // Get data from binary tree:
         result = BinaryTree.Find(xq);
-        
+
         // Print data to CLI
         if (NULL != result)
         {
@@ -81,14 +83,14 @@ int main()
                 }
                 arma::mat set;
             }
-            
+
             // Put data into armadillo containers:
             arma::uvec ix = conv_to<arma::uvec>::from(result->ix);
             arma::vec rix = r.elem(ix);
-                 
+
             // Print data to CLI:
             rix.print("r[ix] = ");
-                      
+
             // Save data to file:
             sso << i;
             string fileName = "result_";
@@ -101,7 +103,7 @@ int main()
         {
             cout << "no points in node: " << endl;
         }
-          
+
     }
     
     
