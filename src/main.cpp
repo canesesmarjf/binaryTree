@@ -17,11 +17,11 @@ int main()
   // Setup binary tree:
   // ===================================================================
   // Generate computational domain:
-  double x_left = -4;
-  double x_right = +4;
+  double x_left  = -2;
+  double x_right = +2;
 
   // Define maximum depth of tree:
-  int depth_max = 7;
+  int depth_max = 6;
 
   // Root node depth:
   int depth_root = 0;
@@ -29,12 +29,24 @@ int main()
   // Create instance of binary tree:
   node BinaryTree(x_left,x_right,depth_root,depth_max);
 
+  // Create binary tree grid:
+  // ===================================================================
+  int num_cells_tree = pow(2,depth_max);
+  double dx = (x_right - x_left)/num_cells_tree;
+  arma::vec tree_grid = arma::linspace(x_left,(x_right-dx),num_cells_tree) + dx/2;
+
+
+  // Create node_list vector:
+  // ===================================================================
+  vector<node*> node_list;
+  node_list.resize(num_cells_tree);
+
   // Generate random sample:
   // ===================================================================
-  // arma_rng::set_seed_random();
+  arma_rng::set_seed_random();
   int N_CP = 1e+4;
   double mean_r = 0;
-  double std_r = (x_right - x_left)/10;
+  double std_r = (x_right - x_left)/5;
   vec r = randn(N_CP)*std_r + mean_r;
 
   // Save to test data:
@@ -46,12 +58,14 @@ int main()
   auto start = high_resolution_clock::now();
   BinaryTree.Insert_all(&r);
   auto stop = high_resolution_clock::now();
+
+  // Calculate time it took to assemble:
   auto duration = duration_cast<microseconds>(stop - start);
   cout << duration.count() << endl;
 
   // Find data in tree:
   // ===================================================================
-  int queries = 3;
+  int queries = num_cells_tree;
   node * result = NULL;
 
   // Create string stream object:
@@ -60,12 +74,12 @@ int main()
   for (int i = 0; i < queries; i++)
   {
       // Prompt and gather data from user:
-      cout << "Enter a number: " << endl;
-      double xq;
-      cin >> xq;
+      // cout << "Enter a number: " << endl;
+      // double xq;
+      // cin >> xq;
 
       // Get data from binary tree:
-      result = BinaryTree.Find(xq);
+      result = BinaryTree.Find(tree_grid.at(i));
 
       // Print data to CLI
       if (NULL != result)

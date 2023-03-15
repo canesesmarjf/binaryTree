@@ -24,12 +24,12 @@ dataset = load(fileName);
 
 % Get output data produced by binary tree during queries:
 % =========================================================================
-for qq = 1:3
+fileName = dir('../output_files/result_*');
+for qq = 1:numel(fileName)
     try
-        fileName = ['../output_files/result_',num2str(qq-1),'.txt'];
-        xq{qq} = load(fileName);
+        xq{qq} = load(['../output_files/',fileName(qq).name]);
     catch
-        disp(['File note found: ',fileName]);
+        disp(['File note found: ',fileName(qq).name]);
         continue;
     end
 end
@@ -56,23 +56,26 @@ if 0
     hL.FontSize = 13;
 end
 
-% Plot results from C++ binary tree search:
+%% Plot results from C++ binary tree search:
 % =========================================================================
 figure('color','w')
 hold on
 box on
 grid on;
 
+markerColor = {'k.','r.','bl.','g.','m.','c.'};
+
 % Plot the input data:
 hq(1) = plot(dataset,'k.');
 
 % Plot the data found using the binary tree:
-for qq = 1:3
+for qq = 1:numel(fileName)
     try
         ix     = xq{qq}+1;
         dataset_ix = dataset(ix);
-    
-        hq(qq+1) = plot(ix,dataset_ix,'r.');
+        
+        val = circshift(markerColor,qq-1);
+        hq(qq+1) = plot(ix,dataset_ix,val{1});
     catch
         disp(['Data not found']);
         continue;

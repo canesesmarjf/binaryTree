@@ -5,7 +5,6 @@
 #include <armadillo>
 
 // Header file for binary search tree
-
 class node
 {
     public:
