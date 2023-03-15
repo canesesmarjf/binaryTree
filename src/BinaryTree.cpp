@@ -102,6 +102,8 @@ void node::Insert(uint i, arma::vec * r)
 
 } // node::Insert
 
+// Insert_all method:
+// ==================================================================================================================
 void node::Insert_all(arma::vec * r)
 {
   for (int i = 0; i < r->size(); i++)
