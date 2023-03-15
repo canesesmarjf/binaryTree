@@ -26,13 +26,13 @@ node::node(double x_left, double x_right, int depth, int depth_max)
     this->x_right    = x_right;
     this->depth      = depth;
     this->depth_max  = depth_max;
-    
+
     // Allocate memory for subnodes:
     this->subnode.reserve(2);
     this->subnode[0] = NULL;
     this->subnode[1] = NULL;
     this->x_count    = 0;
-    
+
     // To improve performance, we need to preallocate memory so that std::vector does not need to resize at every insertion:
     // This may be acheived in a two step fashion, where we first count how many points are inserted in each end node, and
     // then we loop again over all particles again and allocate memory at the very first insertion occurance.
@@ -45,10 +45,10 @@ void node::Insert(uint i, arma::vec * r)
 {
     // Objective:
     // Insert point into a subnode of current node. When maximum depth is reached, append point to node.
-    
+
     // Current data point:
     double p = arma::as_scalar(r->at(i));
-    
+
     // Check if data is within node's boundaries:
     // ===============================================
     if (!IsPointInsideBoundary(p))
@@ -57,7 +57,7 @@ void node::Insert(uint i, arma::vec * r)
         cout << "point " << p <<" is outside domain" << endl;
         return;
     }
-    
+
     // Check if maximum tree depth has been reached:
     // ===============================================
     // If yes, append point's index to leaf and RETURN up the stack
@@ -80,43 +80,50 @@ void node::Insert(uint i, arma::vec * r)
                 cout << "j = " << j << ", ix[j] = " << this->ix[j] <<", value = " << r->at(this->ix[j]) <<endl;
             }
         }
-        
+
         // Return control to calling stack:
         return;
     }
-    
+
     // Determine which subnode to insert point:
     // ========================================
     int node_index = WhichSubNodeDoesItBelongTo(p);
-    
+
     // Check if subnode needs to be created:
     // ====================================
     if ( !DoesSubNodeExist(node_index) )
     {
         CreateSubNode(node_index);
     }
-    
+
     // Insert point into subnode:
     // ==========================
     this->subnode[node_index]->Insert(i,r);
-        
+
 } // node::Insert
 
+void node::Insert_all(arma::vec * r)
+{
+  for (int i = 0; i < r->size(); i++)
+  {
+      this->Insert(i,r);
+  }
+}
 
 // ==================================================================================================================
 bool node::IsPointInsideBoundary(double p)
 {
     // Objective:
     // if p is inside the boundaries of the node, return true, otherwise false
-    
+
     // Define boundaries of node:
     double x_left  = this->x_left;
     double x_right = this->x_right;
-        
+
     // Create boolean result:
     bool flag = ((p >= x_left) && (p <= x_right));
-    
-    
+
+
     return flag;
 }
 
@@ -125,7 +132,7 @@ bool node::HasNodeReachMaxDepth()
 {
     int depth     = this->depth;
     int depth_max = this->depth_max;
-        
+
     if (depth >= depth_max)
     {
         return 1;
@@ -141,13 +148,13 @@ int node::WhichSubNodeDoesItBelongTo(double p)
 {
     //   +------------------+------------------+
     //   |  node_left = 1  |  node_right = 0  |
-    
+
     // Center location of present node:
     double x_center = this->x_center;
-    
+
     // Number associated with subnode:
     int node_index;
-    
+
     // Determine which location point belongs to:
     if ( p < x_center)
     {
@@ -157,7 +164,7 @@ int node::WhichSubNodeDoesItBelongTo(double p)
     {
         node_index = 0; // right
     }
-        
+
     return node_index;
 }
 
@@ -165,7 +172,7 @@ int node::WhichSubNodeDoesItBelongTo(double p)
 // ==================================================================================================================
 node * node::Find(double xq)
 {
-    
+
     // Check if data is within node's boundaries:
     if (!IsPointInsideBoundary(xq))
     {
@@ -173,31 +180,31 @@ node * node::Find(double xq)
         cout << "point " << xq <<" is outside domain" << endl;
         return NULL;
     }
-    
+
     // Check if we have reached maximum depth:
     if (HasNodeReachMaxDepth())
     {
         return this;
     }
-    
+
     // Determine which subnode to move into:
     int node_index = WhichSubNodeDoesItBelongTo(xq);
-        
+
     // Check if subnode exists:
     if (!DoesSubNodeExist(node_index))
     {
         return NULL;
     }
-       
+
     // Drill further into subnode:
     return this->subnode[node_index]->Find(xq);
-    
+
 }
 
 // ==================================================================================================================
 bool node::DoesSubNodeExist(int node_index)
 {
-    
+
     if (NULL == subnode[node_index])
     {
         // Does not exist:
@@ -208,7 +215,7 @@ bool node::DoesSubNodeExist(int node_index)
         // It already exists:
         return 1;
     }
-    
+
 }
 
 // ==================================================================================================================
@@ -219,7 +226,7 @@ void node::CreateSubNode(int node_index)
     int depth_max = this->depth_max;
     double x_left;
     double x_right;
-    
+
     switch (node_index)
     {
     case 0: // Right subnode:
@@ -227,7 +234,7 @@ void node::CreateSubNode(int node_index)
             // Attributes for new subnode:
             x_left  = this->x_center;
             x_right = this->x_right;
-                
+
             // Exit:
             break;
         }
@@ -241,10 +248,10 @@ void node::CreateSubNode(int node_index)
             break;
         }
     }
-    
+
     // Create new subnode:
     this->subnode[node_index] = new node(x_left, x_right, depth, depth_max);
-    
+
 }
 
 // ==================================================================================================================

@@ -1,20 +1,32 @@
-% This script read the output produced during Ex_5 and shows the result of producing a normally distributed set
+% This script read the output produced during Ex_5 and shows the result of producing a normally distributed dataset
+
+% Computational procedure:
+% - Binary tree with bounds from -4 to +4 is created
+% - Dataset is composed of 1E4 points distributed according to a gaussian
+% centered at zero and standard deviation of 1/10th the size of domain.
+% - Maximum depth of tree is k = 7 which leads to 128 cells.
+% - To produce the data output, three queries are performed.
+% These consist of asking the user for 3 axial position and the result
+% return the node containing that point.
+% - From that node, we can extract all the indices of the points inside that
+% node and save to file
 
 clear all
 close all
 clc
 
-% Read data produced and saved by C++ code:
-home_dir = cd;
-cd ..
-cd output_files
+saveFig = 1;
 
-fileName = 'data.txt';
-set = load(fileName);
+% Get data used as input to binary tree:
+% =========================================================================
+fileName = '../output_files/data.txt';
+dataset = load(fileName);
 
+% Get output data produced by binary tree during queries:
+% =========================================================================
 for qq = 1:3
     try
-        fileName = ['result_',num2str(qq-1),'.txt'];
+        fileName = ['../output_files/result_',num2str(qq-1),'.txt'];
         xq{qq} = load(fileName);
     catch
         disp(['File note found: ',fileName]);
@@ -22,18 +34,17 @@ for qq = 1:3
     end
 end
 
-cd(home_dir);
-
-% Create analytic PDF:
-x = linspace(-4,4,1e3);
-y = normalDistPDF(x,0,8/10);
-
 % Create histogram:
+% =========================================================================
 if 0
+    % Create analytic PDF:
+    x = linspace(-4,4,1e3);
+    y = normalDistPDF(x,0,8/10);
+
     figure('color','w')
     hold on
     box on
-    h(1) = histogram(set,100,'Normalization','pdf');
+    h(1) = histogram(dataset,100,'Normalization','pdf');
     h(2) = plot(x,y,'r','LineWidth',2);
     
     legendText{1} = ['C++ armadillo data'];
@@ -45,23 +56,43 @@ if 0
     hL.FontSize = 13;
 end
 
-% Plot raw data with queries from C++ binary search tree:
+% Plot results from C++ binary tree search:
+% =========================================================================
 figure('color','w')
 hold on
 box on
-hq(1) = plot(set,'k.');
 grid on;
 
+% Plot the input data:
+hq(1) = plot(dataset,'k.');
+
+% Plot the data found using the binary tree:
 for qq = 1:3
     try
         ix     = xq{qq}+1;
-        set_ix = set(ix);
+        dataset_ix = dataset(ix);
     
-        hq(qq+1) = plot(ix,set_ix,'ro');
-        plot(ix,set_ix,'ro');
+        hq(qq+1) = plot(ix,dataset_ix,'r.');
     catch
         disp(['Data not found']);
         continue;
     end
 end
 
+hL = legend([hq(1),hq(2)],'Input data','from binary search');
+set(hL,'interpreter','latex')
+set(gca,'fontSize',14)
+ylim([-1,+1]*2)
+
+% Save figure:
+% =========================================================================
+if saveFig
+    folderName = '../output_files/';
+    figureName = 'Step_1_find_results';
+    
+    % PDF figure:
+    exportgraphics(gcf,[folderName,figureName,'.pdf'],'Resolution',600,'ContentType', 'vector') 
+
+    % TIFF figure:
+    exportgraphics(gcf,[folderName,figureName,'.tiff'],'Resolution',600) 
+end
