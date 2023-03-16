@@ -16,37 +16,20 @@ int main()
 {
   // Setup binary tree:
   // ===================================================================
-  // Generate computational domain:
+  // Tree attributes:
   double x_left  = -2;
   double x_right = +2;
-
-  // Define maximum depth of tree:
   int depth_max = 6;
 
-  // Root node depth:
-  int depth_root = 0;
-
   // Create instance of binary tree:
-  node BinaryTree(x_left,x_right,depth_root,depth_max);
-
-  // Create binary tree grid:
-  // ===================================================================
-  int num_cells_tree = pow(2,depth_max);
-  double dx = (x_right - x_left)/num_cells_tree;
-  arma::vec tree_grid = arma::linspace(x_left,(x_right-dx),num_cells_tree) + dx/2;
-
-
-  // Create node_list vector:
-  // ===================================================================
-  vector<node*> node_list;
-  node_list.resize(num_cells_tree);
+  BinaryTree_TYP tree(x_left,x_right,depth_max);
 
   // Generate random sample:
   // ===================================================================
   arma_rng::set_seed_random();
   int N_CP = 1e+4;
-  double mean_r = 0;
-  double std_r = (x_right - x_left)/5;
+  double mean_r = 0.5;
+  double std_r = (x_right - x_left)/7;
   vec r = randn(N_CP)*std_r + mean_r;
 
   // Save to test data:
@@ -56,30 +39,25 @@ int main()
   // Assemble binary tree using the input data:
   // ===================================================================
   auto start = high_resolution_clock::now();
-  BinaryTree.Insert_all(&r);
+  tree.insert_all(&r);
   auto stop = high_resolution_clock::now();
 
   // Calculate time it took to assemble:
+  // ===================================================================
   auto duration = duration_cast<microseconds>(stop - start);
   cout << duration.count() << endl;
 
-  // Find data in tree:
+  // Save data to file:
   // ===================================================================
-  int queries = num_cells_tree;
   node * result = NULL;
 
   // Create string stream object:
   stringstream sso;
 
-  for (int i = 0; i < queries; i++)
+  for (int i = 0; i < tree.get_num_nodes(); i++)
   {
-      // Prompt and gather data from user:
-      // cout << "Enter a number: " << endl;
-      // double xq;
-      // cin >> xq;
-
       // Get data from binary tree:
-      result = BinaryTree.Find(tree_grid.at(i));
+      result = tree.node_list[i];
 
       // Print data to CLI
       if (NULL != result)

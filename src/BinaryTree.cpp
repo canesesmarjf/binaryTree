@@ -2,49 +2,111 @@
 #include <iostream>
 
 // Improvements:
-// [DONE] 1 - Remove the else statement in the ::Insert() method
-// [DONE] 2 - Use vector<node*> subnodes insteads of node_left and node_right
-// [DONE] 3 - Pass i and r insteads of sometimes p or i,p and r, otherwise, somehow save the value of the data's pointer &r
-// 4 - Make getter and setter functions to hide all variables as private
 // 5- Improve code execution by optimizing dynamic memory allocation via (a) insert for counting and then (b) insert for allocating + appending
-
 
 using namespace std;
 
 // Constructors:
-// ==================================================================================================================
-node::node()
+// ================================================================================================================
+BinaryTree_TYP::BinaryTree_TYP(double x_left, double x_right, int depth_max)
 {
-    cout << "default constructor" << endl;
+  // Internal variables:
+  this->depth_max = depth_max;
+  this->num_nodes = pow(2,depth_max);
+  this->dx = (x_right - x_left)/this->num_nodes;
+  this->node_centers = arma::linspace(x_left,(x_right-dx),this->num_nodes) + dx/2;
+
+  // Create root node:
+  int depth_root = 0;
+  root = new node(x_left,x_right,depth_root,depth_max);
+
+  // Allocate memory to node list, which is a vector of pointers:
+  node_list.resize(this->num_nodes);
 }
 
+// ================================================================================================================
+void BinaryTree_TYP::insert_all(arma::vec * r)
+{
+  // Insert points into nodes:
+  this->root->insert_all(r);
+
+  // Assemble list of populated nodes into a vector of pointers:
+  assemble_node_list();
+}
+
+// ================================================================================================================
+int BinaryTree_TYP::get_num_nodes()
+{
+  return this->num_nodes;
+}
+
+// ================================================================================================================
+arma::vec BinaryTree_TYP::get_node_centers()
+{
+  return this->node_centers;
+}
+
+// ================================================================================================================
+int BinaryTree_TYP::get_max_depth()
+{
+  return this->depth_max;
+}
+
+// ================================================================================================================
+void BinaryTree_TYP::assemble_node_list()
+{
+  for (int nn = 0; nn < this->num_nodes; nn++)
+  {
+    // Get the location of the nth node center:
+    double xq = this->node_centers.at(nn);
+
+    // Copy the pointer of the node containing xq into the node list:
+    this->node_list.at(nn) = this->root->find(xq);
+  }
+}
+
+// ================================================================================================================
+node::node()
+{
+  cout << "default constructor" << endl;
+}
+
+// ================================================================================================================
 node::node(double x_left, double x_right, int depth, int depth_max)
 {
-    // Node attributes:
-    this->x_center   = (x_left + x_right)/2;
-    this->x_left     = x_left;
-    this->x_right    = x_right;
-    this->depth      = depth;
-    this->depth_max  = depth_max;
+  // Node attributes:
+  this->x_center   = (x_left + x_right)/2;
+  this->x_left     = x_left;
+  this->x_right    = x_right;
+  this->depth      = depth;
+  this->depth_max  = depth_max;
 
-    // Allocate memory for subnodes:
-    this->subnode.reserve(2);
-    this->subnode[0] = NULL;
-    this->subnode[1] = NULL;
-    this->x_count    = 0;
+  // Allocate memory for subnodes:
+  this->subnode.reserve(2);
+  this->subnode[0] = NULL;
+  this->subnode[1] = NULL;
+  this->x_count    = 0;
+
+  cout << "Overloaded node constructor" << endl;
+
+  if (depth == depth_max)
+  {
+    // When depth_max == depth, we have reached the final layer of nodes. At this point. we can reserve
+    // memory to this node as it will be a data holding node.
 
     // To improve performance, we need to preallocate memory so that std::vector does not need to resize at every insertion:
     // This may be acheived in a two step fashion, where we first count how many points are inserted in each end node, and
     // then we loop again over all particles again and allocate memory at the very first insertion occurance.
     // this->ix.reserve(500); // Reserve memory
+  }
 }
 
-// Insert method:
-// ==================================================================================================================
-void node::Insert(uint i, arma::vec * r)
+// insert method:
+// ================================================================================================================
+void node::insert(uint i, arma::vec * r)
 {
     // Objective:
-    // Insert point into a subnode of current node. When maximum depth is reached, append point to node.
+    // insert point into a subnode of current node. When maximum depth is reached, append point to node.
 
     // Current data point:
     double p = arma::as_scalar(r->at(i));
@@ -98,21 +160,21 @@ void node::Insert(uint i, arma::vec * r)
 
     // Insert point into subnode:
     // ==========================
-    this->subnode[node_index]->Insert(i,r);
+    this->subnode[node_index]->insert(i,r);
 
-} // node::Insert
+} // node::insert
 
-// Insert_all method:
-// ==================================================================================================================
-void node::Insert_all(arma::vec * r)
+// insert_all method:
+// ================================================================================================================
+void node::insert_all(arma::vec * r)
 {
   for (int i = 0; i < r->size(); i++)
   {
-      this->Insert(i,r);
+      this->insert(i,r);
   }
 }
 
-// ==================================================================================================================
+// =================================================================================================================
 bool node::IsPointInsideBoundary(double p)
 {
     // Objective:
@@ -129,7 +191,7 @@ bool node::IsPointInsideBoundary(double p)
     return flag;
 }
 
-// ==================================================================================================================
+// ================================================================================================================
 bool node::HasNodeReachMaxDepth()
 {
     int depth     = this->depth;
@@ -145,7 +207,7 @@ bool node::HasNodeReachMaxDepth()
     }
 }
 
-// ==================================================================================================================
+// ================================================================================================================
 int node::WhichSubNodeDoesItBelongTo(double p)
 {
     //   +------------------+------------------+
@@ -170,9 +232,9 @@ int node::WhichSubNodeDoesItBelongTo(double p)
     return node_index;
 }
 
-// Find method:
-// ==================================================================================================================
-node * node::Find(double xq)
+// find method:
+// =================================================================================================================
+node * node::find(double xq)
 {
 
     // Check if data is within node's boundaries:
@@ -199,11 +261,11 @@ node * node::Find(double xq)
     }
 
     // Drill further into subnode:
-    return this->subnode[node_index]->Find(xq);
+    return this->subnode[node_index]->find(xq);
 
 }
 
-// ==================================================================================================================
+// ================================================================================================================
 bool node::DoesSubNodeExist(int node_index)
 {
 
@@ -220,7 +282,7 @@ bool node::DoesSubNodeExist(int node_index)
 
 }
 
-// ==================================================================================================================
+// ================================================================================================================
 void node::CreateSubNode(int node_index)
 {
     // Attributes for new subnode:
@@ -256,8 +318,8 @@ void node::CreateSubNode(int node_index)
 
 }
 
-// ==================================================================================================================
-node * node::GetSubNode(int index)
+// ================================================================================================================
+node * node::get_subnode(int index)
 {
     return this->subnode[index];
 }
