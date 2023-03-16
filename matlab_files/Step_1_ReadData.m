@@ -66,7 +66,7 @@ grid on;
 markerColor = {'k.','r.','bl.','g.','m.','c.'};
 
 % Plot the input data:
-hq(1) = plot(dataset,'k.');
+hin(1) = plot(dataset,'k.');
 
 % Plot the data found using the binary tree:
 for qq = 1:numel(fileName)
@@ -75,15 +75,15 @@ for qq = 1:numel(fileName)
         dataset_ix = dataset(ix);
         
         val = circshift(markerColor,qq-1);
-        hq(qq+1) = plot(ix,dataset_ix,val{1});
+        hq(qq) = plot(ix,dataset_ix,val{1});
     catch
         disp(['Data not found']);
         continue;
     end
 end
 
-hL = legend([hq(1),hq(2)],'Input data','from binary search');
-set(hL,'interpreter','latex')
+% hL = legend([hin(1),hq(1)],'Input data','from binary search');
+% set(hL,'interpreter','latex')
 set(gca,'fontSize',14)
 ylim([-1,+1]*2)
 

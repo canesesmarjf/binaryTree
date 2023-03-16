@@ -7,36 +7,36 @@
 #include <sstream>
 
 using namespace std::chrono;
-
-//using namespace H5;
 using namespace std;
 using namespace arma;
 
 int main()
 {
-  // Setup binary tree:
-  // ===================================================================
-  // Tree attributes:
-  double x_left  = -2;
-  double x_right = +2;
-  int depth_max = 6;
-
-  // Create instance of binary tree:
-  BinaryTree_TYP tree(x_left,x_right,depth_max);
-
   // Generate random sample:
   // ===================================================================
   arma_rng::set_seed_random();
   int N_CP = 1e+4;
-  double mean_r = 0.5;
-  double std_r = (x_right - x_left)/7;
+  double mean_r = 0;
+  double x_min = -2;
+  double x_max = +2;
+  double std_r = (x_max - x_min)/15;
   vec r = randn(N_CP)*std_r + mean_r;
 
   // Save to test data:
-  // ===================================================================
   r.save("output_files/data.txt",raw_ascii);
 
-  // Assemble binary tree using the input data:
+  // Create a binary tree empty of data:
+  // ===================================================================
+  // Tree parameters:
+  double x_left  = -2;
+  double x_right = +2;
+  int depth_max = 6;
+  int num_elem  = N_CP;
+  binaryTree_TYP tree(x_left,x_right,depth_max,N_CP);
+
+  tree.print_info(20);
+
+  // Populate binary tree with data by inserting entire dataset "r" into binary tree structure:
   // ===================================================================
   auto start = high_resolution_clock::now();
   tree.insert_all(&r);
@@ -49,54 +49,45 @@ int main()
 
   // Save data to file:
   // ===================================================================
-  node * result = NULL;
+  tree.save_data_all("result_");
 
-  // Create string stream object:
-  stringstream sso;
-
-  for (int i = 0; i < tree.get_num_nodes(); i++)
+  /*
+  if (0)
   {
-      // Get data from binary tree:
-      result = tree.node_list[i];
+    // Create string stream object:
+    stringstream sso;
 
-      // Print data to CLI
-      if (NULL != result)
-      {
-          cout << "x_left  = " << result->x_left  << endl;
-          cout << "x_right = " << result->x_right << endl;
-          cout << "x_count = " << result->x_count << endl;
+    for (int i = 0; i < tree.get_num_nodes(); i++)
+    {
+        // Print data to CLI
+        if (tree.node_list[i]->ix.empty() == false)
+        {
+            cout << "x_left  = " << tree.node_list[i]->x_left  << endl;
+            cout << "x_right = " << tree.node_list[i]->x_right << endl;
+            cout << "x_count = " << tree.node_list[i]->x_count << endl;
 
-          // Print data using std::vector:
-          if (0)
-          {
-              for (int j = 0; j < result->x_count ; j++ )
-              {
-                  cout << "r[ix] = " << r[result->ix[j]] << " , ix = " << result->ix[j] << endl;
-              }
-              arma::mat set;
-          }
+            // Put data into armadillo containers:
+            arma::uvec ix = conv_to<arma::uvec>::from(tree.node_list[i]->ix);
+            arma::vec rix = r.elem(ix);
 
-          // Put data into armadillo containers:
-          arma::uvec ix = conv_to<arma::uvec>::from(result->ix);
-          arma::vec rix = r.elem(ix);
-
-          // Print data to CLI:
-          rix.print("r[ix] = ");
-
-          // Save data to file:
-          sso << i;
-          string fileName = "result_";
-          fileName = "output_files/" + fileName + sso.str() + ".txt";
-          cout << "Saving data with fileName = " << fileName << endl;
-          ix.save(fileName,raw_ascii);
-          sso.str("");
-      }
-      else
-      {
-          cout << "no points in node: " << endl;
-      }
-
+            // Print data to CLI:
+            rix.print("r[ix] = ");
+        }
+        else
+        {
+            cout << "no points in node i =  " << i << endl;
+        }
+    }
   }
+  */
+
+  // Test clearing the tree from data:
+  // ===================================================================
+  tree.print_info(43);
+
+  tree.clear_all();
+
+  tree.print_info(43);
 
   return 0;
 }
