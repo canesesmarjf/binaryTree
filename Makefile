@@ -4,19 +4,22 @@
 # =====================================================================================================================
 COMPILER= g++
 SYS=$(shell uname)
-LIB_ROOT = /Users/juanfcanesesmarin/Documents/BUSINESS/COMPX/ARPAE/Practice_ARMA_HDF5/Practice_2_C++/
+LIB_ROOT = $(PWD)/
 ARMA_INCL = $(LIB_ROOT)arma_libs/include/
 ARMA_LIBS = $(LIB_ROOT)arma_libs/lib/
-HDF5_INCL = $(LIB_ROOT)HDF5_libs/include/
-HDF5_LIBS = $(LIB_ROOT)HDF5_libs/lib/
-INCL = -I $(ARMA_INCL) -I $(HDF5_INCL) -I include/
-LIBS = -L $(ARMA_LIBS) -L $(HDF5_LIBS) -larmadillo -lhdf5 -lhdf5_cpp -DARMA_USE_HDF5 -headerpad_max_install_names
+INCL = -I $(ARMA_INCL) -I include/
+LIBS = -L $(ARMA_LIBS) -larmadillo
 OBJ = main.o BinaryTree.o
 
-
+# =====================================================================================================================
 all: bin/BinarySearch.exe
 
 bin/BinarySearch.exe: obj/main.o obj/BinaryTree.o
+
+	if [ $(SYS) = "Darwin" ]; then \
+		LIBS = -L $(ARMA_LIBS) -larmadillo -headerpad_max_install_names; \
+	fi
+
 	$(COMPILER) -o $@ $^ $(LIBS)
 
 	if [ $(SYS) = "Darwin" ]; then \
@@ -34,10 +37,6 @@ clean: cleanBin cleanObj
 
 cleanBin:
 	-rm -r bin/*
-	
+
 cleanObj:
 	-rm -r obj/*
-
-
-
-

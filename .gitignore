@@ -30,6 +30,8 @@
 *.exe
 *.out
 *.app
+
+# Various
 .DS_Store
 bin/
 obj/
