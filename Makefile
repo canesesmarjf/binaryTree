@@ -8,17 +8,18 @@ LIB_ROOT = $(PWD)/
 ARMA_INCL = $(LIB_ROOT)arma_libs/include/
 ARMA_LIBS = $(LIB_ROOT)arma_libs/lib/
 INCL = -I $(ARMA_INCL) -I include/
-LIBS = -L $(ARMA_LIBS) -larmadillo
+# LIBS = -L $(ARMA_LIBS) -larmadillo
+ifeq ($(shell uname),Darwin)
+    LIBS = -L $(ARMA_LIBS) -larmadillo -headerpad_max_install_names
+else
+    LIBS = -L $(ARMA_LIBS) -larmadillo
+endif
 OBJ = main.o BinaryTree.o
 
 # =====================================================================================================================
 all: bin/BinarySearch.exe
 
 bin/BinarySearch.exe: obj/main.o obj/BinaryTree.o
-
-	if [ $(SYS) = "Darwin" ]; then \
-		LIBS = -L $(ARMA_LIBS) -larmadillo -headerpad_max_install_names; \
-	fi
 
 	$(COMPILER) -o $@ $^ $(LIBS)
 
