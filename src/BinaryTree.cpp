@@ -1,9 +1,6 @@
 #include "BinaryTree.h"
 #include <iostream>
 
-// Improvements:
-// 5- Improve code execution by optimizing dynamic memory allocation via (a) insert for counting and then (b) insert for allocating + appending
-
 using namespace std;
 
 // Constructors:

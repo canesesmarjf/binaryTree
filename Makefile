@@ -15,6 +15,7 @@ else
     LIBS = -L $(ARMA_LIBS) -larmadillo
 endif
 OBJ = main.o BinaryTree.o
+OPT = -g
 
 # =====================================================================================================================
 all: bin/BinarySearch.exe
@@ -29,10 +30,10 @@ bin/BinarySearch.exe: obj/main.o obj/BinaryTree.o
 	fi
 
 obj/main.o: src/main.cpp
-	$(COMPILER) -c $^ -o $@ $(INCL) -std=c++11
+	$(COMPILER) $(OPT) -c $^ -o $@ $(INCL) -std=c++11
 
 obj/BinaryTree.o: src/BinaryTree.cpp include/BinaryTree.h
-	$(COMPILER) -c $< -o $@ $(INCL) -std=c++11
+	$(COMPILER) $(OPT) -c $< -o $@ $(INCL) -std=c++11
 
 clean: cleanBin cleanObj
 
