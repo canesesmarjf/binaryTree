@@ -69,7 +69,8 @@ markerColor = {'k.','r.','bl.','g.','m.','c.'};
 hin(1) = plot(dataset,'k.');
 
 % Plot the data found using the binary tree:
-for qq = 1:numel(fileName)
+for qq = 1:numel(// ================================================================================================================
+)
     try
         ix     = xq{qq}+1;
         dataset_ix = dataset(ix);
