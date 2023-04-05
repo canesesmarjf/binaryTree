@@ -93,8 +93,9 @@ int main()
   // Save data to csv:
   // ======================================================================
   arma::uvec ix = conv_to<arma::uvec>::from(result->ix);
-  ix.save("ix.csv", arma::csv_ascii);
+  ix.save("ix_main_2.csv", arma::csv_ascii);
 
+  // TEST as 1 DIM binary tree
   // TEST WITH 3 DIMENSIONS
   // NEED TO DEVELOP A WAY TO CLEAN TREE!
 
