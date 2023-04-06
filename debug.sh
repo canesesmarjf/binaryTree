@@ -9,7 +9,9 @@ if [ "$1" = "1" ]; then
   ddt ./bin/main_1.exe
 elif [ "$1" = "2" ]; then
   ddt ./bin/main_2.exe
+elif [ "$1" = "3" ]; then
+  ddt ./bin/main_3.exe
 else
-  echo "Invalid argument. Usage: $0 [1|2]"
+  echo "Invalid argument. Usage: $0 [1|2|3]"
   exit 1
 fi

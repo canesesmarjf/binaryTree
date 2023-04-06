@@ -88,25 +88,24 @@ int main()
   // Test the find option:
   // ======================================================================
   int i = 10318;
-  node_TYP * result = tree.root->find(i,data);
+  node_TYP * leaf = tree.root->find(i,data);
+  cout << "leaf->ix.size() = " << leaf->ix.size() << endl;
 
   // Save data to csv:
   // ======================================================================
-  arma::uvec ix = conv_to<arma::uvec>::from(result->ix);
+  arma::uvec ix = conv_to<arma::uvec>::from(leaf->ix);
   ix.save("ix_main_2.csv", arma::csv_ascii);
 
-  // TEST as 1 DIM binary tree
-  // TEST WITH 3 DIMENSIONS
-  // NEED TO DEVELOP A WAY TO CLEAN TREE!
+  // Test clearing the tree from data:
+  // ===================================================================
+  i = 1;
+  leaf = tree.root->find(i,data);
+  cout << "leaf->ix.size() = " << leaf->ix.size() << endl;
 
+  tree.clear_all();
 
-  // // Test clearing the tree from data:
-  // // ===================================================================
-  // tree.print_info(43);
-  //
-  // tree.clear_all();
-  //
-  // tree.print_info(43);
+  leaf = tree.root->find(i,data);
+  cout << "leaf->ix.size() = " << leaf->ix.size() << endl;
 
   return 0;
 }

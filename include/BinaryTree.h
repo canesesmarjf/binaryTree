@@ -78,6 +78,7 @@ public:
   void insert(uint i, vector<arma::vec *> data, bool write_data); // Insert the ith element of data
   void insert_all(vector<arma::vec *> data); // Insert all elements of the data
   node_TYP * find(uint i, vector<arma::vec *> data);
+  void clear_node();
   // node_TYP * find(double xq); // Find and return pointer of node corresponding to position xq
   // node_TYP * get_subnode(int index); // ?
 
@@ -119,7 +120,7 @@ public:
   // int get_num_nodes();
   // arma::vec get_node_centers();
   // int get_max_depth();
-  // void clear_all();
+  void clear_all();
   // void print_info(int ii);
   // void save_data_all(string prefix);
 

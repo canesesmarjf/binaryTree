@@ -31,10 +31,10 @@ int main()
   double v_max = 1.60E6;
   double x_max = 1;
 
-  tree_params.dimensionality = 1;
+  tree_params.dimensionality = 3;
   tree_params.min       = {-x_max, -v_max, 0     };
   tree_params.max       = {+x_max, +v_max, +v_max};
-  tree_params.max_depth = {4     ,5     , 4     };
+  tree_params.max_depth = {4     ,5      , 4     };
 
   // Assemble data into format needed for tree:
   // ===================================================================
@@ -62,23 +62,20 @@ int main()
   // ======================================================================
   // int i = 10318;
   int i = 9500-1;
-  node_TYP * result = tree.root->find(i,data);
+  node_TYP * leaf = tree.root->find(i,data);
+
+  cout << "leaf = " << leaf << endl;
 
   // Save data to csv:
   // ======================================================================
-  arma::uvec ix = conv_to<arma::uvec>::from(result->ix);
+  arma::uvec ix = conv_to<arma::uvec>::from(leaf->ix);
   ix.save("ix_main_3.csv", arma::csv_ascii);
-  
+
   // NEED TO DEVELOP A WAY TO CLEAN TREE!
 
-
-  // // Test clearing the tree from data:
-  // // ===================================================================
-  // tree.print_info(43);
-  //
-  // tree.clear_all();
-  //
-  // tree.print_info(43);
+  // Test clearing the tree from data:
+  // ===================================================================
+  tree.clear_all();
 
   return 0;
 }

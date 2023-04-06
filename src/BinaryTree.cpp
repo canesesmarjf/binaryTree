@@ -104,17 +104,21 @@ void binaryTree_TYP::assemble_node_list()
     node_list.at(nn) = root->find(xq);
   }
 }
+*/
 
 // ================================================================================================================
 void binaryTree_TYP::clear_all()
 {
-  for (int nn = 0; nn < node_list.size(); nn++)
+  if (NULL == root)
   {
-    node_list[nn]->x_count = 0;
-    node_list[nn]->ix.clear();
+    cout << "Tree has NULL root node" << endl;
+    return;
   }
+
+  root->clear_node();
 }
 
+/*
 // ================================================================================================================
 void binaryTree_TYP::print_info(int ii)
 {
@@ -162,9 +166,7 @@ void binaryTree_TYP::save_data_all(string prefix)
 // ================================================================================================================
 node_TYP::node_TYP(arma::vec min, arma::vec max, uint depth, tree_params_TYP * tree_params)
 {
-  // Calculate dimension this node is concerned with:
-  cout << "depth = " << depth << endl;
-  tree_params->dim_levels.print("dim_level = ");
+  // Calculate dimension this node is concerned with based on the depth:
   this->dim = sum(depth > tree_params->dim_levels);
 
   // Node attributes:
@@ -272,8 +274,10 @@ void node_TYP::insert(uint i, vector<arma::vec *> data, bool write_data)
         }
         else
         {
-          // Move to next dimension:
-          this->dim++;
+          // Evaluate data at next dimension:
+          dim++; // Needs to be removed, but affects WhichSubnodeDoesitBelongTo
+          // Consider calculating dim based on depth:
+          // int present_dim = sum(this->depth >= tree_params->dim_levels);
           p = arma::as_scalar(data[dim]->at(i));
         }
     }
@@ -301,6 +305,10 @@ void node_TYP::insert_all(vector<arma::vec *> data)
 {
   for (int i = 0; i < data[0]->size(); i++)
   {
+      if ( i == 9500 - 1 )
+      {
+        cout << i << endl;
+      }
       this->insert(i,data,true);
   }
 }
@@ -487,6 +495,23 @@ void node_TYP::CreateSubNode(int node_index)
 
     // Create new subnode:
     this->subnode[node_index] = new node_TYP(min, max, depth, tree_params);
+}
+
+// ================================================================================================================
+void node_TYP::clear_node()
+{
+  this->x_count = 0;
+  this->ix.clear();
+
+  if (NULL != this->subnode[0])
+  {
+    this->subnode[0]->clear_node();
+  }
+
+  if (NULL != this->subnode[1])
+  {
+    this->subnode[1]->clear_node();
+  }
 }
 
 /*
