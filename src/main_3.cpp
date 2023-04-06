@@ -4,6 +4,8 @@
 #include <chrono>
 #include <string>
 #include <sstream>
+#include <cstdlib>
+#include <ctime>
 
 using namespace std::chrono;
 using namespace std;
@@ -58,24 +60,69 @@ int main()
   // ======================================================================
   tree.insert_all(data);
 
-  // Test the find option:
+  // Test the first find option:
   // ======================================================================
   // int i = 10318;
-  int i = 9500-1;
-  node_TYP * leaf = tree.root->find(i,data);
+  // int i = 9500-1;
+  int i = 9165-1;
+  int search_dimensionality = 3;
+  // node_TYP * leaf = tree.root->find(i,data,search_dimensionality);
+  node_TYP * leaf = tree.find(i,data,search_dimensionality);
 
   cout << "leaf = " << leaf << endl;
+  cout << "node coordinates: " << endl;
+  leaf->center.print();
+  cout << "leaf->ip.size() = " << leaf->ip.size() << endl;
 
   // Save data to csv:
   // ======================================================================
-  arma::uvec ix = conv_to<arma::uvec>::from(leaf->ix);
-  ix.save("ix_main_3.csv", arma::csv_ascii);
+  arma::uvec ip = conv_to<arma::uvec>::from(leaf->ip);
+  ip.save("ip_main_3.csv", arma::csv_ascii);
 
-  // NEED TO DEVELOP A WAY TO CLEAN TREE!
+  // Test the second find option:
+  // ======================================================================
+  // This one is intended to be used with the node centers so that we can assemble a node list
+  // node_x below will contain all the data stored undernearth that node
+  double x_m = 0.2;
+  node_TYP * node_x = tree.find(x_m);
+  cout << "node_x = " << node_x << endl;
+  cout << "node_x coordinates: " << endl;
+  node_x->center.print();
+  cout << "node_x->ip.size() = " << node_x->ip.size() << endl;
+
+  // Save data to csv:
+  ip = conv_to<arma::uvec>::from(node_x->ip);
+  ip.save("ip_main_3b.csv", arma::csv_ascii);
+
+  // Lets take a random index from that node_x and get all the data stored in the 3D node:
+  int p_count = node_x->p_count;
+  std::srand(std::time(nullptr));
+  int random_index = rand()%p_count;
+  int iq = node_x->ip[random_index];
+
+  node_TYP * node_v = tree.root->find(iq,data,3);
+  ip = conv_to<arma::uvec>::from(node_v->ip);
+  ip.save("ip_main_3c.csv", arma::csv_ascii);
 
   // Test clearing the tree from data:
   // ===================================================================
+  cout << "Testing clearing the tree: " << endl;
+  x_m = 0.3;
+  node_x = tree.find(x_m);
+  cout << "Prior to clearing, node_x->ip.size() = " << node_x->ip.size() << endl;
+
+  // i = 1;
+  // leaf = tree.root->find(i,data,search_dimensionality);
+  // cout << "leaf->ip.size() = " << leaf->ip.size() << endl;
+
   tree.clear_all();
+
+  x_m = 0.3;
+  node_x = tree.find(x_m);
+  cout << "After clearing, node_x->ip.size() = " << node_x->ip.size() << endl;
+
+  // leaf = tree.root->find(i,data,search_dimensionality);
+  // cout << "leaf->ip.size() = " << leaf->ip.size() << endl;
 
   return 0;
 }

@@ -127,9 +127,9 @@ void binaryTree_TYP::print_info(int ii)
   cout << "tree.node_list[ii]->x_center      = " << node_list[ii]->x_center << endl;
   cout << "tree.node_list[ii]->x_right       = " << node_list[ii]->x_right << endl;
   cout << "tree.node_list[ii]->depth         = " << node_list[ii]->depth << endl;
-  cout << "tree.node_list[ii]->ix.capacity() = " << node_list[ii]->ix.capacity() << endl;
-  cout << "tree.node_list[ii]->x_count       = " << node_list[ii]->x_count << endl;
-  cout << "tree.node_list[ii]->ix.size()     = " << node_list[ii]->ix.size() << endl;
+  cout << "tree.node_list[ii]->ip.capacity() = " << node_list[ii]->ip.capacity() << endl;
+  cout << "tree.node_list[ii]->p_count       = " << node_list[ii]->p_count << endl;
+  cout << "tree.node_list[ii]->ip.size()     = " << node_list[ii]->ip.size() << endl;
   cout << " " << endl;
 }
 
@@ -137,12 +137,12 @@ void binaryTree_TYP::print_info(int ii)
 void binaryTree_TYP::save_data(int ii, string prefix)
 {
   // Put data into armadillo containers:
-  arma::uvec ix = arma::conv_to<arma::uvec>::from(node_list[ii]->ix);
+  arma::uvec ip = arma::conv_to<arma::uvec>::from(node_list[ii]->ip);
 
   // Save data to file:
   string fileName = "output_files/" + prefix + to_string(ii) + ".txt";
   cout << "Saving data with fileName = " << fileName << endl;
-  ix.save(fileName,arma::raw_ascii);
+  ip.save(fileName,arma::raw_ascii);
 }
 
 // ================================================================================================================
@@ -150,7 +150,7 @@ void binaryTree_TYP::save_data_all(string prefix)
 {
   for (int ii = 0; ii < get_num_nodes(); ii++)
   {
-      if (node_list[ii]->ix.empty() == false)
+      if (node_list[ii]->ip.empty() == false)
       {
           // Save data for node ii:
           save_data(ii, prefix);
@@ -166,9 +166,6 @@ void binaryTree_TYP::save_data_all(string prefix)
 // ================================================================================================================
 node_TYP::node_TYP(arma::vec min, arma::vec max, uint depth, tree_params_TYP * tree_params)
 {
-  // Calculate dimension this node is concerned with based on the depth:
-  this->dim = sum(depth > tree_params->dim_levels);
-
   // Node attributes:
   this->center  = (min + max)/2;
   this->min     = min;
@@ -180,47 +177,9 @@ node_TYP::node_TYP(arma::vec min, arma::vec max, uint depth, tree_params_TYP * t
   this->subnode.reserve(2);
   this->subnode[0] = NULL;
   this->subnode[1] = NULL;
-  this->x_count    = 0;
-
-  /*
-  if (depth == tree_params->depth_max)
-  {
-    // When depth_max == depth, we have reached the final layer of nodes. At this point. we can reserve
-    // memory to this node as it will be a data holding node.
-
-    // Reserve memory:
-    this->ix.reserve(2*tree_params->elem_per_node);
-  }
-  */
+  this->p_count    = 0;
 }
 
-/*
-// ================================================================================================================
-node_TYP::node_TYP(double x_left, double x_right, int depth, tree_params_TYP * tree_params)
-{
-  // Node attributes:
-  this->x_center    = (x_left + x_right)/2;
-  this->x_left      = x_left;
-  this->x_right     = x_right;
-  this->depth       = depth;
-  this->tree_params = tree_params;
-
-  // Allocate memory for subnodes:
-  this->subnode.reserve(2);
-  this->subnode[0] = NULL;
-  this->subnode[1] = NULL;
-  this->x_count    = 0;
-
-  if (depth == tree_params->depth_max)
-  {
-    // When depth_max == depth, we have reached the final layer of nodes. At this point. we can reserve
-    // memory to this node as it will be a data holding node.
-
-    // Reserve memory:
-    this->ix.reserve(2*tree_params->elem_per_node);
-  }
-}
-*/
 // insert method:
 // ================================================================================================================
 void node_TYP::insert(uint i, vector<arma::vec *> data, bool write_data)
@@ -228,12 +187,15 @@ void node_TYP::insert(uint i, vector<arma::vec *> data, bool write_data)
     // Objective:
     // insert point into a subnode of current node. When maximum depth is reached, append point to node.
 
+    // Determine dimension to operate on:
+    int dim = sum(depth > tree_params->dim_levels);
+
     // Current data point:
-    double p = arma::as_scalar(data[dim]->at(i));
+    double p = arma::as_scalar(data[dim]->at(i)); // make it a function that takes in i, data,dim
 
     // Check if data is within node's boundaries:
     // ===============================================
-    if (!IsPointInsideBoundary(p))
+    if (!IsPointInsideBoundary(p,dim))
     {
         // Warning message:
         cout << "point " << p <<" is outside domain" << endl;
@@ -243,27 +205,13 @@ void node_TYP::insert(uint i, vector<arma::vec *> data, bool write_data)
     // Check if maximum tree depth has been reached:
     // ===============================================
     // If yes, append point's index to leaf and RETURN up the stack
-    if (HasNodeReachMaxDepth())
+    if (HasNodeReachMaxDepth(dim))
     {
         // Append point:
         if (write_data)
         {
-          this->ix.push_back(i);
-          this->x_count++;
-        }
-
-        // Diagnostics:
-        if (0)
-        {
-            cout << "i = " << i << endl;
-            cout << "size of ix = " << this->ix.size() << endl;
-            cout << "this->x_count = " << this->x_count << endl;
-            cout << "x_left = " << this->min[dim] << endl;
-            cout << "x_right = " << this->max[dim] << endl;
-            for (int j = 0; j < this->ix.size(); j++)
-            {
-                cout << "j = " << j << ", ix[j] = " << this->ix[j] <<", value = " << data[dim]->at(this->ix[j]) <<endl;
-            }
+          this->ip.push_back(i);
+          this->p_count++;
         }
 
         // Return control to calling stack IF max_depth for all dimensions has been reached:
@@ -275,22 +223,20 @@ void node_TYP::insert(uint i, vector<arma::vec *> data, bool write_data)
         else
         {
           // Evaluate data at next dimension:
-          dim++; // Needs to be removed, but affects WhichSubnodeDoesitBelongTo
-          // Consider calculating dim based on depth:
-          // int present_dim = sum(this->depth >= tree_params->dim_levels);
+          dim++;
           p = arma::as_scalar(data[dim]->at(i));
         }
     }
 
     // Determine which subnode to insert point:
     // ========================================
-    int node_index = WhichSubNodeDoesItBelongTo(p);
+    int node_index = WhichSubNodeDoesItBelongTo(p,dim);
 
     // Check if subnode needs to be created:
     // ====================================
     if ( !DoesSubNodeExist(node_index) )
     {
-        CreateSubNode(node_index);
+        CreateSubNode(node_index,dim);
     }
 
     // Insert point into subnode:
@@ -315,7 +261,7 @@ void node_TYP::insert_all(vector<arma::vec *> data)
 
 
 // =================================================================================================================
-bool node_TYP::IsPointInsideBoundary(double p)
+bool node_TYP::IsPointInsideBoundary(double p, int dim)
 {
     // Objective:
     // if p is inside the boundaries of the node, return true, otherwise false
@@ -331,11 +277,11 @@ bool node_TYP::IsPointInsideBoundary(double p)
 }
 
 // ================================================================================================================
-bool node_TYP::HasNodeReachMaxDepth()
+bool node_TYP::HasNodeReachMaxDepth(int dim)
 {
     int depth = this->depth;
 
-    if (depth >= tree_params->dim_levels[dim])
+    if (depth >= tree_params->dim_levels[dim]) // Greater only? equal only?
     {
         return 1;
     }
@@ -346,7 +292,7 @@ bool node_TYP::HasNodeReachMaxDepth()
 }
 
 // ================================================================================================================
-int node_TYP::WhichSubNodeDoesItBelongTo(double p)
+int node_TYP::WhichSubNodeDoesItBelongTo(double p, int dim)
 {
     //   +------------------+------------------+
     //   |  node_left = 1  |  node_right = 0  |
@@ -370,14 +316,32 @@ int node_TYP::WhichSubNodeDoesItBelongTo(double p)
     return node_index;
 }
 
-/*
+// find method:
+// =================================================================================================================
+node_TYP * binaryTree_TYP::find(int i,vector<arma::vec *> data,int search_dimensionality)
+{
+  return this->root->find(i,data,search_dimensionality);
+}
+
+// find method:
+// =================================================================================================================
+node_TYP * binaryTree_TYP::find(double xq)
+{
+  return this->root->find(xq);
+}
+
 // find method:
 // =================================================================================================================
 node_TYP * node_TYP::find(double xq)
 {
+    // 1D data input inplies the following:
+    int search_dimensionality = 1;
+
+    // Calculate the relevant dimension based on the depth of the present node:
+    int dim = sum(depth > tree_params->dim_levels);
 
     // Check if data is within node's boundaries:
-    if (!IsPointInsideBoundary(xq))
+    if (!IsPointInsideBoundary(xq,dim))
     {
         // Warning message:
         cout << "point " << xq <<" is outside domain" << endl;
@@ -385,13 +349,13 @@ node_TYP * node_TYP::find(double xq)
     }
 
     // Check if we have reached maximum depth:
-    if (HasNodeReachMaxDepth())
+    if (HasNodeReachMaxDepth(dim))
     {
         return this;
     }
 
     // Determine which subnode to move into:
-    int node_index = WhichSubNodeDoesItBelongTo(xq);
+    int node_index = WhichSubNodeDoesItBelongTo(xq,dim);
 
     // Check if subnode exists:
     if (!DoesSubNodeExist(node_index))
@@ -403,17 +367,22 @@ node_TYP * node_TYP::find(double xq)
     return this->subnode[node_index]->find(xq);
 
 }
-*/
 
 // find method:
 // =================================================================================================================
-node_TYP * node_TYP::find(uint i, vector<arma::vec *> data)
+node_TYP * node_TYP::find(uint i, vector<arma::vec *> data, int search_dimensionality)
 {
+    // Check the value of search _dimensionality:
+    assert(search_dimensionality <= tree_params->dimensionality && "search_dimensionality needs to be less or equal to dimensionality of tree");
 
+    // Calculate the relevant dimension based on the depth of the present node:
+    int dim = sum(depth > tree_params->dim_levels);
+
+    // Extract the data based on the dimension being considered:
     double xq = arma::as_scalar(data[dim]->at(i));
 
     // Check if data is within node's boundaries:
-    if (!IsPointInsideBoundary(xq))
+    if (!IsPointInsideBoundary(xq,dim))
     {
         // Warning message:
         cout << "point " << xq <<" is outside domain" << endl;
@@ -421,13 +390,23 @@ node_TYP * node_TYP::find(uint i, vector<arma::vec *> data)
     }
 
     // Check if we have reached maximum depth:
-    if (HasNodeReachMaxDepth())
+    if (HasNodeReachMaxDepth(dim))
     {
+      // Return control to calling stack IF maximum search dimension has been reached:
+      if (depth >= tree_params->dim_levels(search_dimensionality-1))
+      {
         return this;
+      }
+      else
+      {
+        // Evaluate data at next dimension:
+        dim++;
+        xq = arma::as_scalar(data[dim]->at(i));
+      }
     }
 
     // Determine which subnode to move into:
-    int node_index = WhichSubNodeDoesItBelongTo(xq);
+    int node_index = WhichSubNodeDoesItBelongTo(xq,dim);
 
     // Check if subnode exists:
     if (!DoesSubNodeExist(node_index))
@@ -436,14 +415,12 @@ node_TYP * node_TYP::find(uint i, vector<arma::vec *> data)
     }
 
     // Drill further into subnode:
-    return this->subnode[node_index]->find(i,data);
-
+    return this->subnode[node_index]->find(i,data,search_dimensionality);
 }
 
 // ================================================================================================================
 bool node_TYP::DoesSubNodeExist(int node_index)
 {
-
     if (NULL == subnode[node_index])
     {
         // Does not exist:
@@ -454,11 +431,10 @@ bool node_TYP::DoesSubNodeExist(int node_index)
         // It already exists:
         return 1;
     }
-
 }
 
 // ================================================================================================================
-void node_TYP::CreateSubNode(int node_index)
+void node_TYP::CreateSubNode(int node_index, int dim)
 {
     // Attributes for new subnode:
     uint depth = this->depth + 1;
@@ -500,8 +476,8 @@ void node_TYP::CreateSubNode(int node_index)
 // ================================================================================================================
 void node_TYP::clear_node()
 {
-  this->x_count = 0;
-  this->ix.clear();
+  this->p_count = 0;
+  this->ip.clear();
 
   if (NULL != this->subnode[0])
   {
@@ -513,11 +489,3 @@ void node_TYP::clear_node()
     this->subnode[1]->clear_node();
   }
 }
-
-/*
-// ================================================================================================================
-node_TYP * node_TYP::get_subnode(int index)
-{
-    return this->subnode[index];
-}
-*/

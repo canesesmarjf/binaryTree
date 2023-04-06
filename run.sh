@@ -1,5 +1,6 @@
 if [ $(uname) = "Linux" ]; then
-  export LD_LIBRARY_PATH=./arma_libs/lib/:$LD_LIBRARY_PATH
+  # export LD_LIBRARY_PATH=./arma_libs/lib/:$LD_LIBRARY_PATH
+  export LD_LIBRARY_PATH=/home/jfcm/Repos/binaryTree/arma_libs/lib/libarmadillo.so.9:$LD_LIBRARY_PATH
 fi
 
 if [ "$1" = "1" ]; then
