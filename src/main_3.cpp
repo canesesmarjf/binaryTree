@@ -40,7 +40,6 @@ int main()
 
   // Assemble data into format needed for tree:
   // ===================================================================
-
   // Copy the data to arma::vec types:
   auto start = high_resolution_clock::now();
   arma::vec v_par = v_p.col(0);
@@ -66,7 +65,6 @@ int main()
   // int i = 9500-1;
   int i = 9165-1;
   int search_dimensionality = 3;
-  // node_TYP * leaf = tree.root->find(i,data,search_dimensionality);
   node_TYP * leaf = tree.find(i,data,search_dimensionality);
 
   cout << "leaf = " << leaf << endl;
@@ -75,7 +73,6 @@ int main()
   cout << "leaf->ip.size() = " << leaf->ip.size() << endl;
 
   // Save data to csv:
-  // ======================================================================
   arma::uvec ip = conv_to<arma::uvec>::from(leaf->ip);
   ip.save("ip_main_3.csv", arma::csv_ascii);
 

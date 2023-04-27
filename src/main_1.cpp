@@ -22,7 +22,7 @@ int main()
   vec r = randn(N_CP)*std_r + mean_r;
 
   // Save to test data:
-  r.save("output_files/data.txt",raw_ascii);
+  r.save("output_files/main_1/data.txt",raw_ascii);
 
   // Create a binary tree empty of data:
   // ===================================================================
@@ -48,7 +48,7 @@ int main()
 
   // Save data to file:
   // ===================================================================
-  tree.save_data_all("result_");
+  tree.save_data_all("output_files/main_1/" + "result_");
 
   /*
   if (0)
