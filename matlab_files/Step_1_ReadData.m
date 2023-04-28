@@ -1,15 +1,10 @@
 % This script read the output produced during Ex_5 and shows the result of producing a normally distributed dataset
 
 % Computational procedure:
-% - Binary tree with bounds from -4 to +4 is created
+% - Binary tree with bounds from -2 to +2 is created
 % - Dataset is composed of 1E4 points distributed according to a gaussian
 % centered at zero and standard deviation of 1/10th the size of domain.
-% - Maximum depth of tree is k = 7 which leads to 128 cells.
-% - To produce the data output, three queries are performed.
-% These consist of asking the user for 3 axial position and the result
-% return the node containing that point.
-% - From that node, we can extract all the indices of the points inside that
-% node and save to file
+% - Maximum depth of tree is k = 6 which leads to 64 cells.
 
 clear all
 close all
@@ -19,15 +14,15 @@ saveFig = 1;
 
 % Get data used as input to binary tree:
 % =========================================================================
-fileName = '../output_files/data.txt';
+fileName = '../output_files/main_1/data.txt';
 dataset = load(fileName);
 
 % Get output data produced by binary tree during queries:
 % =========================================================================
-fileName = dir('../output_files/result_*');
+fileName = dir('../output_files/main_1/result_*');
 for qq = 1:numel(fileName)
     try
-        xq{qq} = load(['../output_files/',fileName(qq).name]);
+        xq{qq} = load(['../output_files/main_1/',fileName(qq).name]);
     catch
         disp(['File note found: ',fileName(qq).name]);
         continue;
@@ -90,7 +85,7 @@ ylim([-1,+1]*2)
 % Save figure:
 % =========================================================================
 if saveFig
-    folderName = '../output_files/';
+    folderName = '../output_files/main_1/';
     figureName = 'Step_1_find_results';
     
     % PDF figure:

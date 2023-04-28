@@ -251,10 +251,10 @@ void node_TYP::insert_all(vector<arma::vec *> data)
 {
   for (int i = 0; i < data[0]->size(); i++)
   {
-      if ( i == 9500 - 1 )
-      {
-        cout << i << endl;
-      }
+      // if ( i == 9500 - 1 )
+      // {
+      //   cout << i << endl;
+      // }
       this->insert(i,data,true);
   }
 }
@@ -441,9 +441,6 @@ void node_TYP::CreateSubNode(int node_index, int dim)
     arma::vec min = this->min; //x_left;
     arma::vec max = this->max; //x_right;
 
-    min.print("min = ");
-    max.print("max = ");
-
     switch (node_index)
     {
     case 0: // Right subnode:
@@ -465,9 +462,6 @@ void node_TYP::CreateSubNode(int node_index, int dim)
             break;
         }
     }
-
-    min.print("min = ");
-    max.print("max = ");
 
     // Create new subnode:
     this->subnode[node_index] = new node_TYP(min, max, depth, tree_params);
