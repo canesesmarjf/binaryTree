@@ -3,25 +3,7 @@
 
 using namespace std;
 
-/*
-// Constructors:
-// ================================================================================================================
-tree_params_TYP::tree_params_TYP(double x_left, double x_right, int depth_max, int num_elem)
-{
-  this->x_left = x_left;
-  this->x_right = x_right;
-  this->depth_max = depth_max;
-  this->num_elem = num_elem;
-
-  this->num_nodes = pow(2,depth_max);
-  this->length = x_right - x_left;
-  this->dx = (x_right - x_left)/this->num_nodes;
-  this->elem_per_node = round(num_elem/this->num_nodes);
-  this->node_centers = arma::linspace(x_left,(x_right-dx),this->num_nodes) + dx/2;
-}
-*/
-
-// ================================================================================================================
+// =======================================================================================
 binaryTree_TYP::binaryTree_TYP(tree_params_TYP * tree_params)
 {
   // Update tree_params:
@@ -38,75 +20,14 @@ binaryTree_TYP::binaryTree_TYP(tree_params_TYP * tree_params)
   root = new node_TYP(min,max,depth_root,tree_params);
 }
 
-/*
-// ================================================================================================================
-binaryTree_TYP::binaryTree_TYP(double x_left, double x_right, int depth_max, int num_elem)
-{
-  // Interface variables:
-  tree_params = new tree_params_TYP(x_left, x_right, depth_max, num_elem);
-
-  // Allocate memory to node list, which is a vector of pointers:
-  node_list.resize(tree_params->num_nodes);
-
-  // Create root node:
-  int depth_root = 0;
-  root = new node_TYP(tree_params->x_left,tree_params->x_right,depth_root,tree_params);
-
-  // Traverse entire tree:
-  // This is done by inserting node_centers so as to create all the node
-  // at the final depth while not writting any data to the nodes.
-  for (int nn = 0; nn < tree_params->num_nodes; nn++)
-  {
-    bool write_data = false;
-    root->insert(nn,&tree_params->node_centers,write_data);
-  }
-
-  // Assemble list of nodes into a vector of pointers:
-  assemble_node_list();
-}
-*/
-
-// ================================================================================================================
+// =======================================================================================
 void binaryTree_TYP::insert_all(vector<arma::vec *> data)
 {
   // Insert points into nodes:
   this->root->insert_all(data);
 }
 
-/*
-// ================================================================================================================
-int binaryTree_TYP::get_num_nodes()
-{
-  return tree_params->num_nodes;
-}
-
-// ================================================================================================================
-arma::vec binaryTree_TYP::get_node_centers()
-{
-  return tree_params->node_centers;
-}
-
-// ================================================================================================================
-int binaryTree_TYP::get_max_depth()
-{
-  return tree_params->depth_max;
-}
-
-// ================================================================================================================
-void binaryTree_TYP::assemble_node_list()
-{
-  for (int nn = 0; nn < tree_params->num_nodes; nn++)
-  {
-    // Get the location of the nth node center:
-    double xq = tree_params->node_centers.at(nn);
-
-    // Copy the pointer of the node containing xq into the node list:
-    node_list.at(nn) = root->find(xq);
-  }
-}
-*/
-
-// ================================================================================================================
+// =======================================================================================
 void binaryTree_TYP::clear_all()
 {
   if (NULL == root)
@@ -118,52 +39,54 @@ void binaryTree_TYP::clear_all()
   root->clear_node();
 }
 
-/*
-// ================================================================================================================
-void binaryTree_TYP::print_info(int ii)
+// =======================================================================================
+int binaryTree_TYP::count_nodes()
 {
-  cout << " " << endl;
-  cout << "tree.node_list[ii]->x_left        = " << node_list[ii]->x_left << endl;
-  cout << "tree.node_list[ii]->x_center      = " << node_list[ii]->x_center << endl;
-  cout << "tree.node_list[ii]->x_right       = " << node_list[ii]->x_right << endl;
-  cout << "tree.node_list[ii]->depth         = " << node_list[ii]->depth << endl;
-  cout << "tree.node_list[ii]->ip.capacity() = " << node_list[ii]->ip.capacity() << endl;
-  cout << "tree.node_list[ii]->p_count       = " << node_list[ii]->p_count << endl;
-  cout << "tree.node_list[ii]->ip.size()     = " << node_list[ii]->ip.size() << endl;
-  cout << " " << endl;
+  int k = 0;
+  return this->root->count_nodes(k);
 }
 
-// ================================================================================================================
-void binaryTree_TYP::save_data(int ii, string prefix)
+// =======================================================================================
+void binaryTree_TYP::delete_nodes()
 {
-  // Put data into armadillo containers:
-  arma::uvec ip = arma::conv_to<arma::uvec>::from(node_list[ii]->ip);
-
-  // Save data to file:
-  string fileName = "output_files/" + prefix + to_string(ii) + ".txt";
-  cout << "Saving data with fileName = " << fileName << endl;
-  ip.save(fileName,arma::raw_ascii);
+  this->root->delete_nodes();
 }
 
-// ================================================================================================================
-void binaryTree_TYP::save_data_all(string prefix)
+// =======================================================================================
+int node_TYP::count_nodes(int k)
 {
-  for (int ii = 0; ii < get_num_nodes(); ii++)
+  if (this->subnode[0] != NULL)
   {
-      if (node_list[ii]->ip.empty() == false)
-      {
-          // Save data for node ii:
-          save_data(ii, prefix);
-      }
-      else
-      {
-          cout << "no points in node i =  " << ii << endl;
-      }
-  } // for
-}
-*/
+    k = this->subnode[0]->count_nodes(k);
+  }
 
-// ================================================================================================================
+  if (this->subnode[1] != NULL)
+  {
+    k = this->subnode[1]->count_nodes(k);
+  }
+
+  return k + 1;
+}
+
+// =======================================================================================
+void node_TYP::delete_nodes()
+{
+  if (this->subnode[0] != NULL)
+  {
+    this->subnode[0]->delete_nodes();
+    delete this->subnode[0]; // Release memory pointed by subnode[0]
+    this->subnode[0] = NULL; // Prevent dangling pointer
+  }
+
+  if (this->subnode[1] != NULL)
+  {
+    this->subnode[1]->delete_nodes();
+    delete this->subnode[1]; // Release memory pointed by subnode[1]
+    this->subnode[1] = NULL; // Prevent dangling pointer
+  }
+}
+
+// =======================================================================================
 node_TYP::node_TYP(arma::vec min, arma::vec max, uint depth, tree_params_TYP * tree_params)
 {
   // Node attributes:
@@ -181,7 +104,7 @@ node_TYP::node_TYP(arma::vec min, arma::vec max, uint depth, tree_params_TYP * t
 }
 
 // insert method:
-// ================================================================================================================
+// =======================================================================================
 void node_TYP::insert(uint i, vector<arma::vec *> data, bool write_data)
 {
     // Objective:
@@ -334,7 +257,7 @@ node_TYP * binaryTree_TYP::find(double xq)
 // =================================================================================================================
 node_TYP * node_TYP::find(double xq)
 {
-    // 1D data input inplies the following:
+    // 1D data input implies the following:
     int search_dimensionality = 1;
 
     // Calculate the relevant dimension based on the depth of the present node:
@@ -374,6 +297,8 @@ node_TYP * node_TYP::find(uint i, vector<arma::vec *> data, int search_dimension
 {
     // Check the value of search _dimensionality:
     assert(search_dimensionality <= tree_params->dimensionality && "search_dimensionality needs to be less or equal to dimensionality of tree");
+
+    assert(search_dimensionality > 0 && "search_dimensionality needs to be greater than zero");
 
     // Calculate the relevant dimension based on the depth of the present node:
     int dim = sum(depth > tree_params->dim_levels);

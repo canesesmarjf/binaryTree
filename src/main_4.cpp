@@ -11,6 +11,10 @@ using namespace std::chrono;
 using namespace std;
 using namespace arma;
 
+/* OBJECTIVE:
+The Objetive of this script is to produce data from a 3D binary tree so that we may prototype a 3D vranic algorithm in MATLAB
+*/
+
 int main()
 {
   // Load input data:
@@ -36,7 +40,7 @@ int main()
   tree_params.dimensionality = 3;
   tree_params.min       = {-x_max, -v_max, 0     };
   tree_params.max       = {+x_max, +v_max, +v_max};
-  tree_params.max_depth = {4     ,5      , 4     };
+  tree_params.max_depth = {4     ,5+1      , 4+1     };
 
   // Assemble data into format needed for tree:
   // ===================================================================

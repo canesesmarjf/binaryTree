@@ -64,6 +64,8 @@ public:
   node_TYP * find(uint i, vector<arma::vec *> data, int search_dimensionality);
   void clear_node();
   node_TYP * find(double xq); // Find and return pointer of node corresponding to position xq
+  int count_nodes(int k);
+  void delete_nodes();
 
 private:
   // Variables:
@@ -102,6 +104,8 @@ public:
   node_TYP * find(int i,vector<arma::vec *> data,int search_dimensionality);
   node_TYP * find(double xq);
   void clear_all();
+  int count_nodes();
+  void delete_nodes();
 
   // int get_num_nodes();
   // arma::vec get_node_centers();

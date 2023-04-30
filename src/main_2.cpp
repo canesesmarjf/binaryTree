@@ -9,6 +9,10 @@ using namespace std::chrono;
 using namespace std;
 using namespace arma;
 
+/* OBJECTIVE:
+The Objetive of this script is to demonstrate the use the binary tree for 2D and also to demonstrate the use of the dimensionality option
+*/
+
 int main()
 {
   // Load input data:
@@ -85,17 +89,54 @@ int main()
   // ======================================================================
   tree.insert_all(data);
 
-  // Test the find option:
+  // Folder where data is to be stored
+  string file_root = "./output_files/main_2/";
+
+  // Search tree by index:
   // ======================================================================
-  int i = 10318;
-  int search_dimensionality = tree_params.dimensionality;
-  node_TYP * leaf = tree.root->find(i,data,search_dimensionality);
+  // Initialize variables:
+  int i;
+  int search_dimensionality;
+  node_TYP * leaf = NULL;
+  arma::uvec ip;
+
+  i = 10318-1;
+
+  /* How is search dimensionality used?
+  Consider how multi dimensional tree is organized and how it searches. It first searches along the first dimension which has an associated depth. Once it reaches the final depth of the 1st dimension it can move on to the next dimension and progress in depth and so on.
+  At each final depth of a corresponding dimension, the local leaf node stores all the data that is to be used in subsequent depths. So the search dimensionality can be used to determine the depth of the search in terms of the dimensions.
+
+  Thus consider a 3D search, a find with a dimensionlity of 3 returns a set of indices in a space space cube. A dimensionality of 2 returns a slice along dim1 and dim 2.
+  */
+
+  search_dimensionality = 1;
+  leaf = tree.root->find(i,data,search_dimensionality);
   cout << "leaf->ip.size() = " << leaf->ip.size() << endl;
 
   // Save data to csv:
+  ip.resize(leaf->ip.size());
+  ip = conv_to<arma::uvec>::from(leaf->ip);
+  ip.save(file_root + "ip_main_2a.csv", arma::csv_ascii);
+
+  search_dimensionality = 2;
+  leaf = tree.root->find(i,data,search_dimensionality);
+  cout << "leaf->ip.size() = " << leaf->ip.size() << endl;
+
+  // Save data to csv:
+  ip.resize(leaf->ip.size());
+  ip = conv_to<arma::uvec>::from(leaf->ip);
+  ip.save(file_root + "ip_main_2b.csv", arma::csv_ascii);
+
+  // Search tree by position of first node:
   // ======================================================================
-  arma::uvec ip = conv_to<arma::uvec>::from(leaf->ip);
-  ip.save("ip_main_2.csv", arma::csv_ascii);
+  double x_m = 0.25e6;
+  leaf = tree.root->find(x_m);
+  cout << "leaf->ip.size() = " << leaf->ip.size() << endl;
+
+  // Save data to csv:
+  ip.resize(leaf->ip.size());
+  ip = conv_to<arma::uvec>::from(leaf->ip);
+  ip.save(file_root + "ip_main_2c.csv", arma::csv_ascii);
 
   // Test clearing the tree from data:
   // ===================================================================

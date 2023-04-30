@@ -11,6 +11,10 @@ using namespace std::chrono;
 using namespace std;
 using namespace arma;
 
+/* OBJECTIVE:
+The Objetive of this script is to demonstrate the use the binary tree for 1D
+*/
+
 int main()
 {
   // Generate random sample:
@@ -44,13 +48,14 @@ int main()
   // Create a vector with pointers to the data:
   vector<arma::vec *> data = {&r};
 
-  // Insert 2D points into tree:
+  // Insert 1D points into tree:
   // ======================================================================
   auto start = high_resolution_clock::now();
   tree.insert_all(data);
   auto stop = high_resolution_clock::now();
 
-  // Create a vector with points inside each cell:
+  // Create a vector whose elements are the center of each node:
+  // ======================================================================
   int Nx = pow(2,tree_params.max_depth[0]);
   double dx_m = (x_max-x_min)/(Nx);
   arma::vec x_m(Nx);
@@ -60,6 +65,7 @@ int main()
   }
 
   // Find data in each node:
+  // ======================================================================
   node_TYP * leaf = NULL;
   arma::uvec ip;
   string fileName;
@@ -87,6 +93,8 @@ int main()
 
   }
 
+  // Clear tree:
+  // ======================================================================
   tree.clear_all();
 
   return 0;
