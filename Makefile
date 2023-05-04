@@ -22,7 +22,7 @@ OPT = -g
 # ========================================================================================
 all: $(EXES)
 
-bin/%.exe: obj/%.o obj/BinaryTree.o
+bin/%.exe: obj/%.o obj/BinaryTree.o obj/Vranic.o
 	$(COMPILER) -o $@ $^ $(LIBS)
 
 	if [ $(SYS) = "Darwin" ]; then \
@@ -34,6 +34,9 @@ obj/%.o: src/%.cpp
 	$(COMPILER) $(OPT) -c $< -o $@ $(INCL) -std=c++17
 
 obj/BinaryTree.o: src/BinaryTree.cpp include/BinaryTree.h
+	$(COMPILER) $(OPT) -c $< -o $@ $(INCL) -std=c++17
+
+obj/Vranic.o: src/Vranic.cpp include/Vranic.h
 	$(COMPILER) $(OPT) -c $< -o $@ $(INCL) -std=c++17
 
 clean:
