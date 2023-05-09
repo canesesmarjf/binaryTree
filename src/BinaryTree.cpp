@@ -255,6 +255,38 @@ node_TYP * binaryTree_TYP::find(double xq)
 
 // find method:
 // =================================================================================================================
+node_TYP * node_TYP::find(double xq, int dim)
+{
+    // Check if data is within node's boundaries:
+    if (!IsPointInsideBoundary(xq,dim))
+    {
+        // Warning message:
+        cout << "point " << xq <<" is outside domain" << endl;
+        return NULL;
+    }
+
+    // Check if we have reached maximum depth:
+    if (HasNodeReachMaxDepth(dim))
+    {
+        return this;
+    }
+
+    // Determine which subnode to move into:
+    int node_index = WhichSubNodeDoesItBelongTo(xq,dim);
+
+    // Check if subnode exists:
+    if (!DoesSubNodeExist(node_index))
+    {
+        return NULL;
+    }
+
+    // Drill further into subnode:
+    return this->subnode[node_index]->find(xq,dim);
+
+}
+
+// find method:
+// =================================================================================================================
 node_TYP * node_TYP::find(double xq)
 {
     // 1D data input implies the following:
@@ -365,6 +397,7 @@ void node_TYP::CreateSubNode(int node_index, int dim)
     uint depth = this->depth + 1;
     arma::vec min = this->min; //x_left;
     arma::vec max = this->max; //x_right;
+    ip.reserve(500);
 
     switch (node_index)
     {
