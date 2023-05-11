@@ -65,7 +65,8 @@ public:
   void clear_node();
   node_TYP * find(double xq); // Find and return pointer of node corresponding to position xq
   node_TYP * find(double xq, int dim); // Find and return pointer of node corresponding to position xq searched along dimension "dim"
-  int count_nodes(int k);
+  int count_leaf_nodes(int k);
+  int count_leaf_points(int k);
   void delete_nodes();
 
 private:
@@ -105,7 +106,8 @@ public:
   node_TYP * find(int i,vector<arma::vec *> data,int search_dimensionality);
   node_TYP * find(double xq);
   void clear_all();
-  int count_nodes();
+  int count_leaf_nodes();
+  int count_leaf_points();
   void delete_nodes();
 
   // int get_num_nodes();

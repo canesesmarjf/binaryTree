@@ -40,10 +40,17 @@ void binaryTree_TYP::clear_all()
 }
 
 // =======================================================================================
-int binaryTree_TYP::count_nodes()
+int binaryTree_TYP::count_leaf_nodes()
 {
   int k = 0;
-  return this->root->count_nodes(k);
+  return this->root->count_leaf_nodes(k);
+}
+
+// =======================================================================================
+int binaryTree_TYP::count_leaf_points()
+{
+  int k = 0;
+  return this->root->count_leaf_points(k);
 }
 
 // =======================================================================================
@@ -53,19 +60,54 @@ void binaryTree_TYP::delete_nodes()
 }
 
 // =======================================================================================
-int node_TYP::count_nodes(int k)
+int node_TYP::count_leaf_nodes(int k)
 {
   if (this->subnode[0] != NULL)
   {
-    k = this->subnode[0]->count_nodes(k);
+    k = this->subnode[0]->count_leaf_nodes(k);
   }
 
   if (this->subnode[1] != NULL)
   {
-    k = this->subnode[1]->count_nodes(k);
+    k = this->subnode[1]->count_leaf_nodes(k);
   }
 
-  return k + 1;
+  // If both subnodes are NULL, the this must be a leaf_node:
+  if (this->subnode[0] == NULL && this->subnode[1] == NULL)
+  {
+    return k + 1;
+  }
+  else
+  {
+    return k;
+  }
+
+}
+
+// =======================================================================================
+int node_TYP::count_leaf_points(int k)
+{
+  // If subnode[0] exists, drill into it
+  if (this->subnode[0] != NULL)
+  {
+    k = this->subnode[0]->count_leaf_points(k);
+  }
+
+  // If subnode[1] exists, drill into it
+  if (this->subnode[1] != NULL)
+  {
+    k = this->subnode[1]->count_leaf_points(k);
+  }
+
+  // If both subnodes are NULL, the this must be a leaf_node:
+  if (this->subnode[0] == NULL && this->subnode[1] == NULL)
+  {
+    return k + this->p_count;
+  }
+  else
+  {
+    return k;
+  }
 }
 
 // =======================================================================================

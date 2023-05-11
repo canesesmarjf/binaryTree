@@ -78,8 +78,8 @@ int main()
 
   // Count how many nodes where populated:
   // ======================================================================
-  int k = tree.count_nodes();
-  cout << "total number of nodes populated: " << k << endl;
+  int k = tree.count_leaf_nodes();
+  cout << "total number of leaf nodes populated: " << k << endl;
 
   // Folder where data is to be stored:
   // ======================================================================

@@ -18,7 +18,9 @@ elif [ "$1" = "5" ]; then
   ddt ./bin/main_5.exe
 elif [ "$1" = "6" ]; then
   ddt ./bin/main_6.exe
+elif [ "$1" = "6a" ]; then
+  ddt ./bin/main_6a.exe
 else
-  echo "Invalid argument. Usage: $0 [1|2|3|4|5|6]"
+  echo "Invalid argument. Usage: $0 [1|2|3|4|5|6|6a]"
   exit 1
 fi

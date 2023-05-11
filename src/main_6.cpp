@@ -66,7 +66,7 @@ int main()
   cout << "time required for copy = " << duration.count() << endl;
 
   // Create a vector with pointers to the data:
-  vector<arma::vec *> data = {&x_p, &v_par,&v_per};
+  vector<arma::vec *> data = {&x_p, &v_par, &v_per, &a_p};
 
   // Create tree based on parameters:
   // ======================================================================
@@ -78,8 +78,13 @@ int main()
 
   // Count how many nodes where populated:
   // ======================================================================
-  int k = tree.count_nodes();
-  cout << "total number of nodes populated: " << k << endl;
+  int k = tree.count_leaf_nodes();
+  cout << "total number of leaf nodes populated: " << k << endl;
+
+  // Count how many points where inserted:
+  // ======================================================================
+  k = tree.count_leaf_points();
+  cout << "total number of leaf points inserted: " << k << endl;
 
   // Folder where data is to be stored:
   // ======================================================================
@@ -89,25 +94,18 @@ int main()
     fs::create_directory(file_root);
   }
 
-  // Create variables for find operations:
+  // Create grid for each dimension in binary tree:
   // ======================================================================
-  int search_dimensionality;
-  // node_TYP * leaf = NULL;
-  // node_TYP * leaf_v = NULL;
-  node_TYP * leaf_y = NULL;
-  node_TYP * leaf_z = NULL;
+  // This section probably needs to be part of the tree_params_TYP class:
+  // tree_params.calculate_grids();
+
+  double Lx = tree_params.max[0] - tree_params.min[0];
+  double Ly = tree_params.max[1] - tree_params.min[1];
+  double Lz = tree_params.max[2] - tree_params.min[2];
 
   int Nx = pow(2,tree_params.max_depth[0]);
   int Ny = pow(2,tree_params.max_depth[1]);
   int Nz = pow(2,tree_params.max_depth[2]);
-  vector<node_TYP *> leaf_x(Nx);
-  // vector<vector<node_TYP *>> leaf_yz(Ny,vector<node_TYP*>(Nz));
-
-  // Create grid for each dimension in binary tree:
-  // ======================================================================
-  double Lx = tree_params.max[0] - tree_params.min[0];
-  double Ly = tree_params.max[1] - tree_params.min[1];
-  double Lz = tree_params.max[2] - tree_params.min[2];
 
   double dx = Lx/Nx;
   double dy = Ly/Ny;
@@ -117,13 +115,15 @@ int main()
   arma::vec yq = tree_params.min[1] + dy/2 + regspace(0,Ny-1)*dy;
   arma::vec zq = tree_params.min[2] + dz/2 + regspace(0,Nz-1)*dz;
 
-  yq.print("yq = ");
-  zq.print("zq = ");
+  // Create pointers for leaf nodes:
+  // ======================================================================
+  vector<node_TYP *> leaf_x(Nx);
+  node_TYP * leaf_y = NULL;
+  node_TYP * leaf_z = NULL;
 
-  // Create leaf_x list:
+  // Calculate leaf_x list:
   // ======================================================================
   arma::ivec p_count(Nx);
-  arma::imat v_count(Ny,Nz,fill::zeros);
   for (int xx = 0; xx < Nx ; xx++)
   {
    cout << "xq(xx) = " << xq(xx) << endl;
@@ -131,13 +131,12 @@ int main()
    p_count[xx] = leaf_x[xx]->p_count;
   }
 
-  // Calculate mean particle count:
-  int mean_pcount = mean(p_count);
-
   p_count.save(file_root + "p_count_" + ".csv", arma::csv_ascii);
 
   // Save contents of distribution contained in all the tree:
   // ======================================================================
+  arma::imat v_count(Ny,Nz,fill::zeros);
+
   // Loop over leaf_x:
   cout << "leaf_x.size() = " << leaf_x.size() << endl;
   cout << "leaf_x.size() = " << Nx << endl;
@@ -145,7 +144,7 @@ int main()
   for (int xx = 0; xx < Nx ; xx++)
   {
     // Check if current leaf_x is in surplus:
-    if (1)//(p_count[xx] >= mean_pcount)
+    if (1)
     {
       // Loop over y:
       for (int yy = 0; yy < Ny; yy++)
@@ -183,13 +182,94 @@ int main()
   // Save contents of distribution contained ONLY in surplus region of tree:
   // ======================================================================
   std::vector<double> x_surplus;
-  v_count.fill(0);
+  int mean_pcount = mean(p_count);
 
   // Loop over leaf_x:
   for (int xx = 0; xx < Nx ; xx++)
   {
+    // Clear v_count:
+    v_count.fill(0);
+
     // Check if current leaf_x is in surplus:
-    if (p_count[xx] >= mean_pcount)
+    int surplus = p_count[xx] - mean_pcount; //
+    if (surplus <= 0)
+      continue;
+
+    // Record surplus x location:
+    x_surplus.push_back(xq[xx]);
+
+    // Loop over y:
+    for (int yy = 0; yy < Ny; yy++)
+    {
+      // Get current leaf_y:
+      leaf_y = leaf_x[xx]->find(yq[yy],1);
+
+       if (leaf_y == NULL)
+         continue;
+
+       // Loop over z:
+       for (int zz = 0; zz < Nz; zz++)
+       {
+         leaf_z = leaf_y->find(zq[zz],2);
+
+         if (leaf_z == NULL)
+          continue;
+
+         // Record total number of particles in leaf_z cube:
+         v_count(yy,zz) = leaf_z->p_count;
+
+       } // Loop over z
+
+    } // Loop over y
+
+    // Save velocity space density for every leaf_x node:
+    v_count.save(file_root + "surplus_v_count_" + to_string(xx) + ".csv", arma::csv_ascii);
+
+  } // Loop over x
+
+  // Save x_surplus to file:
+  arma::vec x_out(x_surplus.data(),x_surplus.size());
+  x_out.save(file_root + "x_surplus.csv", arma::csv_ascii);
+
+  // Apply Vranic resampling method::
+  // ======================================================================
+  // The following loop does the following:
+  // - Loop over all "x" x_nodes
+  // Select only surplus "x" nodes
+  // Loop over y-z slice and assemble v_count
+  // One v_count is assembled, sort cubes by descending order
+  // Loop over cubes and down sample until total number of particles is equal to desired value
+
+  vranic_TYP vranic;
+  std::vector<uint> ip_free;
+  int N_min = 10;
+  int N = 0;
+  int M = 6;
+  int particle_surplus = 0;
+  int exit_flag_z;
+
+  // Input:
+  // N_min, N, M
+  // ip_free
+  // data
+  // leaf_x from tree: leaf_x[xx]->p_count
+  // xq, yq, zq
+
+  // Output:
+  // data
+  // ip_free
+
+  // Loop over leaf_x:
+  for (int xx = 0; xx < Nx ; xx++)
+  {
+    // Clear flags:
+    exit_flag_z = 0;
+
+    // Calculate particle surplus
+    particle_surplus = p_count[xx] - mean_pcount;
+
+    // Check if current leaf_x is in surplus:
+    if (particle_surplus > 0)
     {
       // Record surplus x location:
       x_surplus.push_back(xq[xx]);
@@ -197,46 +277,105 @@ int main()
       // Loop over y:
       for (int yy = 0; yy < Ny; yy++)
       {
+        if (exit_flag_z == 1)
+          break;
+
+        // Get current leaf_y:
         leaf_y = leaf_x[xx]->find(yq[yy],1);
-         if (leaf_y == NULL)
-         {
-           // cout << "xq[yy] = " << xq[xx] << endl;
-           // cout << "NULL, yq[yy] = " << yq[yy] << endl;
-           // v_count(yy,span::all).zeros();
-         }
-         else
+
+         if (leaf_y != NULL)
          {
            // Loop over z:
            for (int zz = 0; zz < Nz; zz++)
            {
              leaf_z = leaf_y->find(zq[zz],2);
-             if (leaf_z == NULL)
+             if (leaf_z != NULL)
              {
-               // v_count(yy,zz) = 0;
-             }
-             else
-             {
-               v_count(yy,zz) = leaf_z->p_count;
+               // Total number of particles in leaf_z cube:
+               N = leaf_z->p_count;
+
+               if (N >= N_min)
+               {
+                 // Adjust N so that surplus count does not become negative:
+                 // Negative means that leaf_x will be in deficit.
+                 if (particle_surplus - N < 0)
+                {
+                  N = particle_surplus;
+
+                  // Check that new set N is not smaller than M:
+                  if (N < (M+1))
+                  {
+                    exit_flag_z = 1;
+                    break;
+                  }
+                }
+
+                 // Create objects for down-sampling:
+                 merge_cell_TYP set_N(N);
+                 merge_cell_TYP set_M(M);
+
+                 // First N indices of particles in current leaf_z:
+                 arma::uvec ip = conv_to<uvec>::from(leaf_z->ip);
+
+                 // Create set_N:
+                 set_N.xi = data[0]->elem(ip.head(N));
+                 set_N.yi = data[1]->elem(ip.head(N));
+                 set_N.zi = data[2]->elem(ip.head(N));
+                 set_N.wi = data[3]->elem(ip.head(N));
+
+                 // Calculate set M:
+                 // Pass by reference
+                 vranic.down_sample(&set_N, &set_M);
+
+                 // Print statistics:
+                 cout << "Set N: " << endl;
+                 vranic.print_stats(&set_N);
+
+                 // Print statistics:
+                 cout << "Set M: " << endl;
+                 vranic.print_stats(&set_M);
+
+                 for (int ii = 0; ii < N; ii++)
+                 {
+                   // Get global index:
+                   int jj = ip(ii);
+
+                   if (ii < set_M.n_elem)
+                   {
+                     // Down-sample global distribution:
+                     a_p_copy(jj)   = set_M.wi(ii);
+                     x_p_copy(jj)   = set_M.xi(ii);
+                     v_p_copy(jj,0) = set_M.yi(ii);
+                     v_p_copy(jj,1) = set_M.zi(ii);
+                   }
+                   else
+                   {
+                     // Record global indices that correspond to memory locations that are to be repurposed:
+                     ip_free.push_back(jj);
+
+                     // Clear values:
+                     a_p_copy(jj)   = -1;
+                     x_p_copy(jj)   = -1;
+                     v_p_copy(jj,0) = -1;
+                     v_p_copy(jj,1) = -1;
+                   }
+
+                   // Decrement particle surplus:
+                   particle_surplus--;
+                 }
+               }
              }
            } // Loop over z
          }
       } // Loop over y
-
-     // Save velocity space density for every leaf_x node:
-     v_count.save(file_root + "surplus_v_count_" + to_string(xx) + ".csv", arma::csv_ascii);
-     // v_count.zeros();
-     v_count.fill(0);
-
     } // Surplus check
+  } // Loop over x
 
-    // Sort indices of v_count from largest to smallest:
-
-
- } // Loop over x
-
- // Save x_surplus to file:
- arma::vec x_out(x_surplus.data(),x_surplus.size());
- x_out.save(file_root + "x_surplus.csv", arma::csv_ascii);
+  // Save data:
+  arma::file_type format = arma::csv_ascii;
+  a_p_copy.save(file_root + "a_p_copy" + ".csv", format);
+  x_p_copy.save(file_root + "x_p_copy" + ".csv", format);
+  v_p_copy.save(file_root + "v_p_copy" + ".csv", format);
 
   return 0;
 
